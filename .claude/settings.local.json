@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(pnpm install:*)",
+      "Bash(node screenshot.mjs http://localhost:3000 dashboard)",
+      "Bash(mkdir -p \"d:/Projetos/Ordin/ordin-frontend/temporary screenshots\")",
+      "Bash(node -e \":*)"
+    ]
+  }
+}
