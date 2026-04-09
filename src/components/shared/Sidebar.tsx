@@ -1,15 +1,16 @@
 import { NavLink } from 'react-router-dom'
-import { colors, radius, spacing } from '../../theme'
+import { radius, spacing } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: <GridIcon /> },
   { to: '/transacoes', label: 'Transações', icon: <ArrowsIcon /> },
   { to: '/categorias', label: 'Categorias', icon: <TagIcon /> },
-  { to: '/receitas', label: 'Receitas', icon: <TrendUpIcon /> },
-  { to: '/configuracoes', label: 'Configurações', icon: <GearIcon /> },
 ]
 
 export function Sidebar() {
+  const { colors } = useTheme()
+
   return (
     <aside style={{
       width: '200px',
@@ -84,7 +85,7 @@ export function Sidebar() {
           width: '28px', height: '28px', borderRadius: '50%',
           background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '11px', fontWeight: 600, color: colors.textPrimary, flexShrink: 0,
+          fontSize: '11px', fontWeight: 600, color: colors.white, flexShrink: 0,
         }}>AM</div>
         <div style={{ overflow: 'hidden' }}>
           <div style={{ fontSize: '12px', fontWeight: 500, color: colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -123,20 +124,3 @@ function TagIcon() {
     </svg>
   )
 }
-function TrendUpIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M1.5 10L5 6.5l2.5 2.5L12.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9.5 3.5h3v3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-function GearIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M7 1.5v1M7 11.5v1M1.5 7h1M11.5 7h1M3.2 3.2l.7.7M10.1 10.1l.7.7M3.2 10.8l.7-.7M10.1 3.9l.7-.7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  )
-}
-

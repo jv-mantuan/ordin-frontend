@@ -1,5 +1,6 @@
 import type { CategoryDto } from '../../types/category'
-import { colors, radius } from '../../theme'
+import { radius } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 interface CategoryTableProps {
   categories: CategoryDto[]
@@ -7,6 +8,8 @@ interface CategoryTableProps {
 }
 
 export function CategoryTable({ categories, isLoading }: CategoryTableProps) {
+  const { colors } = useTheme()
+
   const cellStyle: React.CSSProperties = {
     padding: '12px 16px',
     fontSize: '14px',

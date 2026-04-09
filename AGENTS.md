@@ -120,6 +120,13 @@ O interceptor de resposta em `client.ts` extrai `{ message, requestId }` nos err
 - **Interactive states:** Every clickable element needs hover, focus-visible, and active states. No exceptions.
 - **Spacing:** Usar tokens de `src/theme.ts` — não inventar valores.
 
+## Theme Support
+
+- Todo componente novo deve suportar os temas dark e light por padrão.
+- Nunca importar `colors` diretamente de `src/theme.ts` dentro de componentes — sempre usar `const { colors } = useTheme()` de `src/context/ThemeContext.tsx`.
+- Se o componente precisar de `isDark` para variações visuais (ex.: gradientes diferentes por tema), usar `const { colors, isDark } = useTheme()`.
+- Quando nenhuma instrução de estilo for fornecida, aplicar as cores via `useTheme()` automaticamente — nunca hardcodar valores hexadecimais nem usar paletas externas.
+
 ## Hard Rules
 
 - Do not add sections, features, or content not in the reference

@@ -4,9 +4,11 @@ import { CategoryTable } from '../../components/shared/CategoryTable'
 import { CategoryPanel } from '../../components/shared/CategoryPanel'
 import { useCategories, useCreateCategory } from '../../hooks/useCategories'
 import { categorySchema } from '../../schemas/category.schema'
-import { colors, radius } from '../../theme'
+import { radius } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 export function CategoriesPage() {
+  const { colors } = useTheme()
   const { data: categories = [], isLoading: catLoading } = useCategories()
   const createCategory = useCreateCategory()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -80,8 +82,8 @@ export function CategoriesPage() {
             marginBottom: '16px',
           }}
         >
-          <SummaryCard label="Categorias cadastradas" value={String(totalCategories)} />
-          <SummaryCard label="Última categoria" value={latestCategory} />
+          <SummaryCard label="Categorias cadastradas" value={String(totalCategories)} colors={colors} />
+          <SummaryCard label="Última categoria" value={latestCategory} colors={colors} />
         </div>
 
         <div
@@ -211,7 +213,7 @@ export function CategoriesPage() {
   )
 }
 
-function SummaryCard({ label, value }: { label: string; value: string }) {
+function SummaryCard({ label, value, colors }: { label: string; value: string; colors: ReturnType<typeof useTheme>['colors'] }) {
   return (
     <div
       style={{

@@ -1,4 +1,5 @@
-import { colors, radius, spacing } from '../../theme'
+import { radius, spacing } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 interface StatCardProps {
   label: string
@@ -8,10 +9,14 @@ interface StatCardProps {
 }
 
 export function StatCard({ label, value, accent, sub }: StatCardProps) {
+  const { colors, isDark } = useTheme()
+
   return (
     <div style={{
       background: accent
-        ? `linear-gradient(145deg, #1e3d2a 0%, #0f2318 100%)`
+        ? isDark
+          ? `linear-gradient(145deg, #1e3d2a 0%, #0f2318 100%)`
+          : `linear-gradient(145deg, #d8eddf 0%, #c2e0cc 100%)`
         : colors.bgCard,
       border: `1px solid ${accent ? 'rgba(90,171,114,0.2)' : colors.border}`,
       borderRadius: radius.lg,

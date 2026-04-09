@@ -5,7 +5,8 @@ import { StatCard } from '../../components/shared/StatCard'
 import { BarChart, type ExpenseByMonth } from '../../components/shared/BarChart'
 import { DonutChart, type DonutSegment } from '../../components/shared/DonutChart'
 import { TransactionTable } from '../../components/shared/TransactionTable'
-import { colors, radius, spacing } from '../../theme'
+import { radius, spacing } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 const SEGMENT_COLORS = ['#5aab72', '#2f6b47', '#8fd39d', '#1f4730', '#6fbf83', '#b4e6bf']
 
@@ -14,6 +15,7 @@ function formatCurrency(value: number) {
 }
 
 export function DashboardPage() {
+  const { colors } = useTheme()
   const { data: transactions = [], isLoading: txLoading } = useTransactions()
 
   const { totalIncome, totalExpense, balance, donutSegments, barChartData } = useMemo(() => {
@@ -37,7 +39,6 @@ export function DashboardPage() {
       .reduce<Record<string, number>>((acc, t) => {
         const key = new Date(t.date).toISOString().split('T')[0]
         acc[key] = (acc[key] ?? 0) + t.amount
-
         return acc
       }, {})
 

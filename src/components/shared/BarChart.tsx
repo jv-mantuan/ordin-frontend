@@ -1,4 +1,4 @@
-import { colors } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 interface BarChartProps {
   title: string
@@ -11,6 +11,7 @@ export interface ExpenseByMonth {
 }
 
 export function BarChart({ title, expensesByDate }: BarChartProps) {
+  const { colors } = useTheme()
   const maxVal = Math.max(...expensesByDate.map((d) => d.value))
   const chartH = 310
   const barW = 28

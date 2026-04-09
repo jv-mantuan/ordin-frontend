@@ -1,4 +1,4 @@
-import { colors } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 export interface DonutSegment {
   label: string
@@ -28,9 +28,9 @@ function segmentPath(
 
   return [
     `M ${ox1} ${oy1}`,
-    `A ${outerR} ${outerR} 0 ${large} 1 ${ox2} ${oy2}`, // outer arc, clockwise
+    `A ${outerR} ${outerR} 0 ${large} 1 ${ox2} ${oy2}`,
     `L ${ix2} ${iy2}`,
-    `A ${innerR} ${innerR} 0 ${large} 0 ${ix1} ${iy1}`, // inner arc, counter-clockwise
+    `A ${innerR} ${innerR} 0 ${large} 0 ${ix1} ${iy1}`,
     'Z',
   ].join(' ')
 }
@@ -41,6 +41,7 @@ function formatLegendValue(value: number): string {
 }
 
 export function DonutChart({ segments }: DonutChartProps) {
+  const { colors } = useTheme()
   const total = segments.reduce((s, d) => s + d.value, 0)
   const cx = 114, cy = 114, outerR = 88, innerR = 58
 

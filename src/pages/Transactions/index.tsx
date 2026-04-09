@@ -6,7 +6,9 @@ import { TopBar } from '../../components/shared/TopBar'
 import { TransactionTable } from '../../components/shared/TransactionTable'
 import { CategoryPanel } from '../../components/shared/CategoryPanel'
 import type { TransactionType } from '../../types/transaction'
-import { colors, radius } from '../../theme'
+import { radius } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
+import type { ThemeColors } from '../../context/ThemeContext'
 import { transactionSchema } from '../../schemas/transaction.schema'
 import { transactionsApi } from '../../api/transactions'
 import { useQueryClient } from '@tanstack/react-query'
@@ -14,6 +16,7 @@ import { useQueryClient } from '@tanstack/react-query'
 type Filter = 'all' | TransactionType
 
 export function TransactionsPage() {
+  const { colors } = useTheme()
   const [filter, setFilter] = useState<Filter>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
@@ -107,6 +110,18 @@ export function TransactionsPage() {
         : 'Não foi possível criar a transação'
       setFormError(message)
     }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    boxSizing: 'border-box',
+    background: colors.bgSurface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: radius.md,
+    color: colors.textPrimary,
+    fontSize: '14px',
+    padding: '12px 14px',
+    outline: 'none',
   }
 
   return (
@@ -232,7 +247,7 @@ export function TransactionsPage() {
               Nova transação
             </div>
 
-            <FormField label="Descrição">
+            <FormField label="Descrição" colors={colors}>
               <input
                 autoFocus
                 value={formData.name}
@@ -246,7 +261,7 @@ export function TransactionsPage() {
             </FormField>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
-              <FormField label="Valor">
+              <FormField label="Valor" colors={colors}>
                 <input
                   value={formData.amount}
                   onChange={(event) => {
@@ -259,7 +274,7 @@ export function TransactionsPage() {
                 />
               </FormField>
 
-              <FormField label="Tipo">
+              <FormField label="Tipo" colors={colors}>
                 <select
                   value={formData.type}
                   onChange={(event) => {
@@ -275,7 +290,7 @@ export function TransactionsPage() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
-              <FormField label="Data">
+              <FormField label="Data" colors={colors}>
                 <input
                   type="date"
                   value={formData.date}
@@ -287,7 +302,7 @@ export function TransactionsPage() {
                 />
               </FormField>
 
-              <FormField label="Categoria">
+              <FormField label="Categoria" colors={colors}>
                 <select
                   value={formData.categoryId}
                   onChange={(event) => {
@@ -352,7 +367,7 @@ export function TransactionsPage() {
   )
 }
 
-function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+function FormField({ label, children, colors }: { label: string; children: React.ReactNode; colors: ThemeColors }) {
   return (
     <label style={{ display: 'block', marginBottom: '12px' }}>
       <span style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: colors.textSecondary, marginBottom: '8px' }}>
@@ -361,18 +376,6 @@ function FormField({ label, children }: { label: string; children: React.ReactNo
       {children}
     </label>
   )
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  boxSizing: 'border-box',
-  background: colors.bgSurface,
-  border: `1px solid ${colors.border}`,
-  borderRadius: radius.md,
-  color: colors.textPrimary,
-  fontSize: '14px',
-  padding: '12px 14px',
-  outline: 'none',
 }
 
 function FilterIcon() {

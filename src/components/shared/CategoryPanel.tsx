@@ -1,5 +1,6 @@
 import type { CategoryDto } from '../../types/category'
-import { colors, radius } from '../../theme'
+import { radius } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 interface CategoryPanelProps {
   categories: CategoryDto[]
@@ -10,6 +11,8 @@ interface CategoryPanelProps {
 }
 
 export function CategoryPanel({ categories, isLoading, onNew, onEdit, onDelete }: CategoryPanelProps) {
+  const { colors } = useTheme()
+
   return (
     <aside style={{
       width: '200px',
@@ -87,8 +90,8 @@ export function CategoryPanel({ categories, isLoading, onNew, onEdit, onDelete }
           >
             <span style={{ fontSize: '12px', color: colors.textSecondary }}>{cat.name}</span>
             <div style={{ display: 'flex', gap: '4px' }}>
-              <ActionBtn onClick={() => onEdit?.(cat)} title="Editar"><EditIcon /></ActionBtn>
-              <ActionBtn onClick={() => onDelete?.(cat.id)} title="Excluir" danger><TrashIcon /></ActionBtn>
+              <ActionBtn onClick={() => onEdit?.(cat)} title="Editar" expense={colors.expense} textMuted={colors.textMuted}><EditIcon /></ActionBtn>
+              <ActionBtn onClick={() => onDelete?.(cat.id)} title="Excluir" danger expense={colors.expense} textMuted={colors.textMuted}><TrashIcon /></ActionBtn>
             </div>
           </div>
         ))}
@@ -97,7 +100,14 @@ export function CategoryPanel({ categories, isLoading, onNew, onEdit, onDelete }
   )
 }
 
-function ActionBtn({ children, onClick, title, danger }: { children: React.ReactNode, onClick?: () => void, title?: string, danger?: boolean }) {
+function ActionBtn({ children, onClick, title, danger, expense, textMuted }: {
+  children: React.ReactNode
+  onClick?: () => void
+  title?: string
+  danger?: boolean
+  expense: string
+  textMuted: string
+}) {
   return (
     <button
       onClick={onClick}
@@ -106,7 +116,7 @@ function ActionBtn({ children, onClick, title, danger }: { children: React.React
         background: 'transparent',
         border: 'none',
         cursor: 'pointer',
-        color: danger ? colors.expense : colors.textMuted,
+        color: danger ? expense : textMuted,
         padding: '2px',
         display: 'flex',
         alignItems: 'center',

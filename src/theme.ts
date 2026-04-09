@@ -1,3 +1,5 @@
+// Static colors kept for non-component contexts (e.g. default values).
+// Inside components, use useTheme() from context/ThemeContext instead.
 export const colors = {
   bgApp: '#0a1410',
   bgSurface: '#0f1a14',

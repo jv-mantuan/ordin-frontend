@@ -1,5 +1,6 @@
 import type { TransactionWithCategoryNameDto } from '../../types/transaction'
-import { colors, radius } from '../../theme'
+import { radius } from '../../theme'
+import { useTheme } from '../../context/ThemeContext'
 
 interface TransactionTableProps {
   transactions: TransactionWithCategoryNameDto[]
@@ -15,6 +16,8 @@ function formatDate(dateValue: string | Date) {
 }
 
 export function TransactionTable({ transactions, isLoading, compact }: TransactionTableProps) {
+  const { colors } = useTheme()
+
   const cellStyle: React.CSSProperties = {
     padding: compact ? '12px 16px' : '12px 16px',
     fontSize: compact ? '14px' : '14px',
