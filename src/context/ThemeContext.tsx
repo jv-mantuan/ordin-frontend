@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
 export interface ThemeColors {
   bgApp: string
@@ -24,7 +24,7 @@ export interface ThemeColors {
   white: string
 }
 
-const darkColors: ThemeColors = {
+export const darkColors: ThemeColors = {
   bgApp: '#0a1410',
   bgSurface: '#0f1a14',
   bgCard: '#142019',
@@ -48,7 +48,7 @@ const darkColors: ThemeColors = {
   white: '#ffffff',
 }
 
-const lightColors: ThemeColors = {
+export const lightColors: ThemeColors = {
   bgApp: '#eef4f0',
   bgSurface: '#ffffff',
   bgCard: '#f7faf8',
@@ -78,21 +78,7 @@ interface ThemeContextValue {
   toggleTheme: () => void
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null)
-
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(true)
-
-  return (
-    <ThemeContext.Provider value={{
-      colors: isDark ? darkColors : lightColors,
-      isDark,
-      toggleTheme: () => setIsDark(d => !d),
-    }}>
-      {children}
-    </ThemeContext.Provider>
-  )
-}
+export const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export function useTheme() {
   const ctx = useContext(ThemeContext)

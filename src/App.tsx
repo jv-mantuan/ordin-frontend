@@ -3,7 +3,10 @@ import { Sidebar } from './components/shared/Sidebar'
 import { DashboardPage } from './pages/Dashboard'
 import { TransactionsPage } from './pages/Transactions'
 import { CategoriesPage } from './pages/Categories'
-import { ThemeProvider, useTheme } from './context/ThemeContext'
+import { ThemeProvider } from './context/ThemeProvider'
+import { useTheme } from './context/ThemeContext'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export default function App() {
   return (
@@ -27,6 +30,19 @@ function AppShell() {
           </Routes>
         </div>
       </div>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        theme="dark"
+        toastStyle={{
+          background: colors.bgCard,
+          color: colors.textPrimary,
+          border: `1px solid ${colors.border}`,
+        }}
+      />
     </BrowserRouter>
   )
 }
