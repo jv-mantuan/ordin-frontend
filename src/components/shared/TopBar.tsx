@@ -36,13 +36,7 @@ export function TopBar({ title, children }: TopBarProps) {
       </h1>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
-        {/* On mobile: only theme toggle + avatar (no bell/settings) */}
-        {!isMobile && (
-          <>
-            <IconBtn colors={colors}><BellIcon /></IconBtn>
-            <IconBtn colors={colors}><SettingsIcon /></IconBtn>
-          </>
-        )}
+
 
         {/* Theme toggle */}
         <button
@@ -79,10 +73,10 @@ export function TopBar({ title, children }: TopBarProps) {
           fontWeight: 600,
           color: colors.white,
           flexShrink: 0,
-        }}>AM</div>
+        }}>JV</div>
 
         {!isMobile && (
-          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>André Martins</span>
+          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>João Victor</span>
         )}
 
         {/* Page-level action slot (e.g. "+ Nova transação") */}
@@ -91,7 +85,7 @@ export function TopBar({ title, children }: TopBarProps) {
     </div>
   )
 }
-
+/* ── Preserved for future use ──
 function IconBtn({ children, colors }: { children: React.ReactNode; colors: ReturnType<typeof useTheme>['colors'] }) {
   return (
     <button style={{
@@ -107,6 +101,7 @@ function IconBtn({ children, colors }: { children: React.ReactNode; colors: Retu
     </button>
   )
 }
+*/
 
 function SunIcon() {
   return (
@@ -125,6 +120,7 @@ function MoonIcon() {
   )
 }
 
+/* ── Preserved for future use ──
 function SettingsIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -142,3 +138,4 @@ function BellIcon() {
     </svg>
   )
 }
+*/

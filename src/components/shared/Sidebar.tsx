@@ -90,10 +90,10 @@ export function Sidebar() {
           background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '11px', fontWeight: 600, color: colors.white, flexShrink: 0,
-        }}>AM</div>
+        }}>JV</div>
         <div style={{ overflow: 'hidden' }}>
           <div style={{ fontSize: '12px', fontWeight: 500, color: colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            André Martins
+            João Victor
           </div>
           <div style={{ fontSize: '10px', color: colors.textMuted }}>Sair</div>
         </div>
