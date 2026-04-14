@@ -159,107 +159,109 @@ export function DashboardPage() {
           </button>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isSmall ? 'minmax(0, 1fr)' : 'minmax(0, 1.62fr) minmax(390px, 1fr)',
-            gridTemplateRows: isSmall ? 'auto' : 'auto minmax(450px, auto) auto',
-            gap: isMobile ? '14px' : '22px',
-            alignItems: 'stretch',
-          }}
-        >
-          {/* Stat Cards row */}
+        <div key={currentDate.toISOString()} className="animate-fade" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, minWidth: 0 }}>
           <div
             style={{
-              gridColumn: isSmall ? '1' : '1 / -1',
               display: 'grid',
-              gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))',
-              gap: isMobile ? '10px' : '20px',
+              gridTemplateColumns: isSmall ? 'minmax(0, 1fr)' : 'minmax(0, 1.62fr) minmax(390px, 1fr)',
+              gridTemplateRows: isSmall ? 'auto' : 'auto minmax(450px, auto) auto',
+              gap: isMobile ? '14px' : '22px',
+              alignItems: 'stretch',
             }}
           >
-            <StatCard
-              label="Receitas"
-              value={formatCurrency(totalIncome)}
-              accent
-              sub={
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  {['Jul', 'Ago', 'Set'].map((m) => (
-                    <span key={m} style={{ fontSize: '10px', color: colors.textMuted }}>{m}</span>
-                  ))}
-                </div>
-              }
-            />
-            <StatCard label="Despesas" value={formatCurrency(totalExpense)} />
-            <div style={{
-              background: colors.bgCard,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.lg,
-              padding: isMobile ? '18px 20px' : '24px 26px',
-              minWidth: 0,
-            }}>
-              <div>
-                <div style={{ fontSize: '16px', fontWeight: 600, color: colors.textSecondary, marginBottom: spacing.md }}>Saldo</div>
-                <div style={{ fontSize: isMobile ? '28px' : '36px', fontWeight: 700, color: colors.textPrimary, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
-                  {formatCurrency(balance)}
+            {/* Stat Cards row */}
+            <div
+              style={{
+                gridColumn: isSmall ? '1' : '1 / -1',
+                display: 'grid',
+                gridTemplateColumns: isMobile ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))',
+                gap: isMobile ? '10px' : '20px',
+              }}
+            >
+              <StatCard
+                label="Receitas"
+                value={formatCurrency(totalIncome)}
+                accent
+                sub={
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    {['Jul', 'Ago', 'Set'].map((m) => (
+                      <span key={m} style={{ fontSize: '10px', color: colors.textMuted }}>{m}</span>
+                    ))}
+                  </div>
+                }
+              />
+              <StatCard label="Despesas" value={formatCurrency(totalExpense)} />
+              <div style={{
+                background: colors.bgCard,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.lg,
+                padding: isMobile ? '18px 20px' : '24px 26px',
+                minWidth: 0,
+              }}>
+                <div>
+                  <div style={{ fontSize: '16px', fontWeight: 600, color: colors.textSecondary, marginBottom: spacing.md }}>Saldo</div>
+                  <div style={{ fontSize: isMobile ? '28px' : '36px', fontWeight: 700, color: colors.textPrimary, letterSpacing: '-0.03em', lineHeight: 1.05 }}>
+                    {formatCurrency(balance)}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* BarChart */}
-          <div style={{ minHeight: 0, minWidth: 0 }}>
-            <BarChart title={`Despesas por dia - ${currentDate.toLocaleString('pt-BR', { month: 'long' })}`} expensesByDate={barChartData} />
-          </div>
+            {/* BarChart */}
+            <div style={{ minHeight: 0, minWidth: 0 }}>
+              <BarChart title={`Despesas por dia - ${currentDate.toLocaleString('pt-BR', { month: 'long' })}`} expensesByDate={barChartData} />
+            </div>
 
-          {/* DonutChart — on mobile it goes below bar chart (grid single col handles this) */}
-          <div
-            style={{
+            {/* DonutChart — on mobile it goes below bar chart (grid single col handles this) */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: spacing.lg,
+                alignSelf: 'stretch',
+              }}
+            >
+              <DonutChart segments={donutSegments} />
+            </div>
+
+            {/* Recent transactions */}
+            <div style={{
+              gridColumn: isSmall ? '1' : '1 / -1',
+              background: colors.bgCard,
+              border: `1px solid ${colors.border}`,
+              borderRadius: radius.lg,
+              overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              gap: spacing.lg,
-              alignSelf: 'stretch',
-            }}
-          >
-            <DonutChart segments={donutSegments} />
-          </div>
-
-          {/* Recent transactions */}
-          <div style={{
-            gridColumn: isSmall ? '1' : '1 / -1',
-            background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.lg,
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            alignSelf: 'start',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: isMobile ? '14px 16px' : '18px 20px',
-              borderBottom: `1px solid ${colors.border}`,
+              alignSelf: 'start',
             }}>
-              <span style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, color: colors.textPrimary }}>
-                Últimas Transações
-              </span>
-              {!isMobile && (
-                <button style={{
-                  background: colors.bgCardElevated,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: radius.sm,
-                  color: colors.textSecondary,
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  padding: '7px 13px',
-                  cursor: 'pointer',
-                }}>
-                  Exportar CSV
-                </button>
-              )}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: isMobile ? '14px 16px' : '18px 20px',
+                borderBottom: `1px solid ${colors.border}`,
+              }}>
+                <span style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, color: colors.textPrimary }}>
+                  Últimas Transações
+                </span>
+                {!isMobile && (
+                  <button style={{
+                    background: colors.bgCardElevated,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: radius.sm,
+                    color: colors.textSecondary,
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    padding: '7px 13px',
+                    cursor: 'pointer',
+                  }}>
+                    Exportar CSV
+                  </button>
+                )}
+              </div>
+              <TransactionTable transactions={recent} isLoading={txLoading} compact />
             </div>
-            <TransactionTable transactions={recent} isLoading={txLoading} compact />
           </div>
         </div>
         </div>{/* end inner padding wrapper */}
