@@ -4,7 +4,6 @@ import { useCategories } from '../../hooks/useCategories'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
 import { TransactionTable } from '../../components/shared/TransactionTable'
-import { CategoryPanel } from '../../components/shared/CategoryPanel'
 import type { TransactionType } from '../../types/transaction'
 import { radius } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
@@ -22,7 +21,6 @@ export function TransactionsPage() {
   const { isMobile, isTablet } = useBreakpoint()
   const [filter, setFilter] = useState<Filter>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -33,13 +31,13 @@ export function TransactionsPage() {
     categoryId: '',
   })
   const { data: transactions = [], isLoading } = useTransactions()
-  const { data: categories = [], isLoading: catLoading } = useCategories()
+  const { data: categories = [] } = useCategories()
   const createTransaction = useCreateTransaction()
   const updateTransaction = useUpdateTransaction()
   const deleteTransaction = useDeleteTransaction()
   const queryClient = useQueryClient()
 
-  const isSmall = isMobile || isTablet
+
 
   const filtered = filter === 'all'
     ? transactions
@@ -287,27 +285,6 @@ export function TransactionsPage() {
               <FilterIcon /> Filtros
             </button>
 
-            {/* Categories button — mobile only */}
-            {isMobile && (
-              <button
-                onClick={() => setIsCategoryDrawerOpen(true)}
-                style={{
-                  background: colors.bgCard,
-                  border: `1px solid ${colors.border}`,
-                  borderRadius: radius.full,
-                  color: colors.textSecondary,
-                  fontSize: '12px',
-                  padding: '5px 12px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  minHeight: '32px',
-                }}
-              >
-                <TagIcon /> Categorias
-              </button>
-            )}
           </div>
 
           {!isMobile && (
@@ -343,22 +320,7 @@ export function TransactionsPage() {
         </div>{/* end inner padding wrapper */}
       </main>
 
-      {/* CategoryPanel — sidebar on desktop, drawer on mobile */}
-      {!isSmall && (
-        <CategoryPanel
-          categories={categories}
-          isLoading={catLoading}
-        />
-      )}
 
-      {isSmall && isCategoryDrawerOpen && (
-        <CategoryPanel
-          categories={categories}
-          isLoading={catLoading}
-          asDrawer
-          onClose={() => setIsCategoryDrawerOpen(false)}
-        />
-      )}
 
       {/* Create transaction modal */}
       {isCreateModalOpen && (
@@ -551,11 +513,3 @@ function FilterIcon() {
   )
 }
 
-function TagIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M6.5 1H11v4.5L6 10.5a.85.85 0 01-1.2 0L1.5 7.2a.85.85 0 010-1.2L6.5 1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-      <circle cx="8.5" cy="3.5" r=".8" fill="currentColor"/>
-    </svg>
-  )
-}
