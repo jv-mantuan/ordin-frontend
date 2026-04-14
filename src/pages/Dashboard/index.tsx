@@ -245,20 +245,6 @@ export function DashboardPage() {
                 <span style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 600, color: colors.textPrimary }}>
                   Últimas Transações
                 </span>
-                {!isMobile && (
-                  <button style={{
-                    background: colors.bgCardElevated,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: radius.sm,
-                    color: colors.textSecondary,
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    padding: '7px 13px',
-                    cursor: 'pointer',
-                  }}>
-                    Exportar CSV
-                  </button>
-                )}
               </div>
               <TransactionTable transactions={recent} isLoading={txLoading} compact />
             </div>

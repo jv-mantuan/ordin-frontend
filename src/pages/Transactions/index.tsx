@@ -269,38 +269,7 @@ export function TransactionsPage() {
                 {tab.label}
               </button>
             ))}
-            <button style={{
-              background: colors.bgCard,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.full,
-              color: colors.textSecondary,
-              fontSize: '12px',
-              padding: '5px 12px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              minHeight: '32px',
-            }}>
-              <FilterIcon /> Filtros
-            </button>
-
           </div>
-
-          {!isMobile && (
-            <button style={{
-              background: colors.bgCard,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.md,
-              color: colors.textSecondary,
-              fontSize: '11px',
-              padding: '5px 12px',
-              cursor: 'pointer',
-              minHeight: '32px',
-            }}>
-              Exportar CSV
-            </button>
-          )}
         </div>
 
         {/* Table */}
@@ -504,12 +473,3 @@ function FormField({ label, children, colors }: { label: string; children: React
     </label>
   )
 }
-
-function FilterIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M1.5 3h9M3 6h6M5 9h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
