@@ -94,6 +94,7 @@ export function CategoriesPage() {
   return (
     <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
       <main
+        className="animate-fade"
         style={{
           flex: 1,
           padding: isMobile ? "16px" : "24px",

@@ -188,7 +188,9 @@ export function TransactionsPage() {
         minWidth: 0,
       }}>
         {/* Inner wrapper carries padding — fixes overflow-y right-padding loss bug */}
-        <div style={{
+        <div 
+          className="animate-fade"
+          style={{
           padding: pagePadding,
           paddingBottom: isMobile ? '80px' : pagePadding,
           minWidth: 0,
