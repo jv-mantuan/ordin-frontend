@@ -31,6 +31,8 @@ export function BarChart({ title, expensesByDate }: BarChartProps) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        minWidth: 0,
+        overflow: 'hidden',
       }}
     >
       <div
@@ -45,7 +47,13 @@ export function BarChart({ title, expensesByDate }: BarChartProps) {
         {title}
       </div>
 
-      <div style={{ display: 'flex', gap: '12px', flex: 1, alignItems: 'stretch' }}>
+      {expensesByDate.length === 0 ? (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minHeight: '260px', opacity: 0.8 }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={colors.border} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+          <div style={{ fontSize: '13px', color: colors.textMuted, maxWidth: '200px', textAlign: 'center', lineHeight: 1.5 }}>Nenhum gasto contabilizado neste período para exibir no gráfico.</div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: '12px', flex: 1, alignItems: 'stretch' }}>
         <div
           style={{
             position: 'relative',
@@ -121,7 +129,8 @@ export function BarChart({ title, expensesByDate }: BarChartProps) {
             })}
           </svg>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

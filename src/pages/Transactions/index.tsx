@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTransactions } from '../../hooks/useTransactions'
 import { useCreateTransaction } from '../../hooks/useTransactions'
 import { useCategories } from '../../hooks/useCategories'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
 import { TransactionTable } from '../../components/shared/TransactionTable'
 import { CategoryPanel } from '../../components/shared/CategoryPanel'
@@ -17,8 +18,10 @@ type Filter = 'all' | TransactionType
 
 export function TransactionsPage() {
   const { colors } = useTheme()
+  const { isMobile, isTablet } = useBreakpoint()
   const [filter, setFilter] = useState<Filter>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -31,6 +34,8 @@ export function TransactionsPage() {
   const { data: categories = [], isLoading: catLoading } = useCategories()
   const createTransaction = useCreateTransaction()
   const queryClient = useQueryClient()
+
+  const isSmall = isMobile || isTablet
 
   const filtered = filter === 'all'
     ? transactions
@@ -112,6 +117,8 @@ export function TransactionsPage() {
     }
   }
 
+  const pagePadding = isMobile ? '16px' : isTablet ? '20px' : '24px'
+
   const inputStyle: React.CSSProperties = {
     width: '100%',
     boxSizing: 'border-box',
@@ -122,37 +129,79 @@ export function TransactionsPage() {
     fontSize: '14px',
     padding: '12px 14px',
     outline: 'none',
+    minHeight: '44px',
   }
 
   return (
-    <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-      <main style={{ flex: 1, padding: '24px', overflowY: 'auto', minWidth: 0 }}>
+    <div style={{ display: 'flex', flex: 1, minHeight: 0, minWidth: 0 }}>
+      <main style={{
+        flex: 1,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        minWidth: 0,
+      }}>
+        {/* Inner wrapper carries padding — fixes overflow-y right-padding loss bug */}
+        <div style={{
+          padding: pagePadding,
+          paddingBottom: isMobile ? '80px' : pagePadding,
+          minWidth: 0,
+        }}>
         <TopBar title="Transações">
+          {/* Nova transação button — only in header on desktop */}
+          {!isMobile && (
+            <button
+              onClick={openCreateModal}
+              style={{
+                background: colors.accentGreenMuted,
+                border: `1px solid rgba(90,171,114,0.25)`,
+                borderRadius: radius.md,
+                color: colors.income,
+                fontSize: '12px',
+                fontWeight: 500,
+                padding: '6px 14px',
+                cursor: 'pointer',
+                minHeight: '36px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              + Nova transação
+            </button>
+          )}
+        </TopBar>
+
+        {/* On mobile: full-width action button below the title bar */}
+        {isMobile && (
           <button
             onClick={openCreateModal}
             style={{
+              width: '100%',
               background: colors.accentGreenMuted,
               border: `1px solid rgba(90,171,114,0.25)`,
               borderRadius: radius.md,
               color: colors.income,
-              fontSize: '12px',
-              fontWeight: 500,
-              padding: '6px 14px',
+              fontSize: '13px',
+              fontWeight: 600,
+              padding: '12px 16px',
               cursor: 'pointer',
+              minHeight: '44px',
+              marginBottom: '16px',
+              letterSpacing: '0.01em',
             }}
           >
             + Nova transação
           </button>
-        </TopBar>
+        )}
 
-        {/* Filter tabs + export */}
+        {/* Filter tabs + actions */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: '16px',
+          gap: '8px',
+          flexWrap: 'wrap',
         }}>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {tabs.map((tab) => (
               <button
                 key={tab.value}
@@ -166,7 +215,8 @@ export function TransactionsPage() {
                   fontWeight: filter === tab.value ? 500 : 400,
                   padding: '5px 14px',
                   cursor: 'pointer',
-                  transition: 'all 0.15s',
+                  transition: 'background 0.15s, color 0.15s',
+                  minHeight: '32px',
                 }}
               >
                 {tab.label}
@@ -183,22 +233,48 @@ export function TransactionsPage() {
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
+              minHeight: '32px',
             }}>
               <FilterIcon /> Filtros
             </button>
+
+            {/* Categories button — mobile only */}
+            {isMobile && (
+              <button
+                onClick={() => setIsCategoryDrawerOpen(true)}
+                style={{
+                  background: colors.bgCard,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: radius.full,
+                  color: colors.textSecondary,
+                  fontSize: '12px',
+                  padding: '5px 12px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  minHeight: '32px',
+                }}
+              >
+                <TagIcon /> Categorias
+              </button>
+            )}
           </div>
 
-          <button style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.md,
-            color: colors.textSecondary,
-            fontSize: '11px',
-            padding: '5px 12px',
-            cursor: 'pointer',
-          }}>
-            Exportar CSV
-          </button>
+          {!isMobile && (
+            <button style={{
+              background: colors.bgCard,
+              border: `1px solid ${colors.border}`,
+              borderRadius: radius.md,
+              color: colors.textSecondary,
+              fontSize: '11px',
+              padding: '5px 12px',
+              cursor: 'pointer',
+              minHeight: '32px',
+            }}>
+              Exportar CSV
+            </button>
+          )}
         </div>
 
         {/* Table */}
@@ -210,13 +286,27 @@ export function TransactionsPage() {
         }}>
           <TransactionTable transactions={filtered} isLoading={isLoading} />
         </div>
+        </div>{/* end inner padding wrapper */}
       </main>
 
-      <CategoryPanel
-        categories={categories}
-        isLoading={catLoading}
-      />
+      {/* CategoryPanel — sidebar on desktop, drawer on mobile */}
+      {!isSmall && (
+        <CategoryPanel
+          categories={categories}
+          isLoading={catLoading}
+        />
+      )}
 
+      {isSmall && isCategoryDrawerOpen && (
+        <CategoryPanel
+          categories={categories}
+          isLoading={catLoading}
+          asDrawer
+          onClose={() => setIsCategoryDrawerOpen(false)}
+        />
+      )}
+
+      {/* Create transaction modal */}
       {isCreateModalOpen && (
         <div
           onClick={closeCreateModal}
@@ -225,24 +315,34 @@ export function TransactionsPage() {
             inset: 0,
             background: 'rgba(10, 20, 16, 0.72)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: isMobile ? 'flex-end' : 'center',
             justifyContent: 'center',
-            padding: '24px',
-            zIndex: 30,
+            padding: isMobile ? '0' : '24px',
+            zIndex: 100,
           }}
         >
           <div
             onClick={(event) => event.stopPropagation()}
             style={{
               width: '100%',
-              maxWidth: '460px',
+              maxWidth: isMobile ? '100%' : '460px',
               background: colors.bgCard,
               border: `1px solid ${colors.border}`,
-              borderRadius: radius.xl,
-              padding: '22px',
+              borderRadius: isMobile ? '16px 16px 0 0' : radius.xl,
+              padding: isMobile ? '20px 16px 0' : '22px',
+              // On mobile the sheet slides up from bottom — adding safe area padding
+              paddingBottom: isMobile ? 'max(24px, calc(env(safe-area-inset-bottom) + 24px))' : '22px',
               boxShadow: '0 24px 80px rgba(0, 0, 0, 0.32)',
+              animation: isMobile ? 'slideUp 0.25s ease-out' : undefined,
             }}
           >
+            {/* Drag handle for mobile sheet */}
+            {isMobile && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '14px' }}>
+                <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: colors.border }} />
+              </div>
+            )}
+
             <div style={{ fontSize: '18px', fontWeight: 600, color: colors.textPrimary, marginBottom: '18px' }}>
               Nova transação
             </div>
@@ -260,7 +360,7 @@ export function TransactionsPage() {
               />
             </FormField>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
               <FormField label="Valor" colors={colors}>
                 <input
                   value={formData.amount}
@@ -289,7 +389,7 @@ export function TransactionsPage() {
               </FormField>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))', gap: '12px' }}>
               <FormField label="Data" colors={colors}>
                 <input
                   type="date"
@@ -338,6 +438,8 @@ export function TransactionsPage() {
                   fontWeight: 500,
                   padding: '8px 14px',
                   cursor: createTransaction.isPending ? 'not-allowed' : 'pointer',
+                  minHeight: '44px',
+                  flex: isMobile ? 1 : undefined,
                 }}
               >
                 Cancelar
@@ -355,6 +457,8 @@ export function TransactionsPage() {
                   padding: '8px 14px',
                   cursor: createTransaction.isPending ? 'wait' : 'pointer',
                   opacity: createTransaction.isPending ? 0.75 : 1,
+                  minHeight: '44px',
+                  flex: isMobile ? 1 : undefined,
                 }}
               >
                 {createTransaction.isPending ? 'Criando...' : 'Criar'}
@@ -363,6 +467,13 @@ export function TransactionsPage() {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }
@@ -382,6 +493,15 @@ function FilterIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path d="M1.5 3h9M3 6h6M5 9h2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function TagIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M6.5 1H11v4.5L6 10.5a.85.85 0 01-1.2 0L1.5 7.2a.85.85 0 010-1.2L6.5 1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+      <circle cx="8.5" cy="3.5" r=".8" fill="currentColor"/>
     </svg>
   )
 }

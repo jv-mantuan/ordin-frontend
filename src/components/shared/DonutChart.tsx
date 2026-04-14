@@ -69,8 +69,9 @@ export function DonutChart({ segments }: DonutChartProps) {
       </div>
 
       {segments.length === 0 ? (
-        <div style={{ fontSize: '12px', color: colors.textMuted, textAlign: 'center', padding: '24px 0' }}>
-          Nenhuma despesa registrada
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', minHeight: '228px', opacity: 0.8 }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={colors.border} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+          <div style={{ fontSize: '13px', color: colors.textMuted, maxWidth: '200px', textAlign: 'center', lineHeight: 1.5 }}>Sem despesas com categorias lançadas neste período.</div>
         </div>
       ) : (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flex: 1 }}>

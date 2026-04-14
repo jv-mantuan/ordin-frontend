@@ -286,6 +286,8 @@ function SummaryCard({
         border: `1px solid ${colors.border}`,
         borderRadius: radius.lg,
         padding: "20px 22px",
+        overflow: "hidden",
+        minWidth: 0,
       }}
     >
       <div
@@ -305,6 +307,9 @@ function SummaryCard({
           color: colors.textPrimary,
           letterSpacing: "-0.03em",
           lineHeight: 1.1,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
       >
         {value}
