@@ -7,6 +7,8 @@ interface TransactionTableProps {
   transactions: TransactionWithCategoryNameDto[]
   isLoading?: boolean
   compact?: boolean
+  onEdit?: (transaction: TransactionWithCategoryNameDto) => void
+  onDelete?: (id: string) => void
 }
 
 function formatCurrency(value: number) {
@@ -16,7 +18,7 @@ function formatDate(dateValue: string | Date) {
   return new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC' }).format(new Date(dateValue))
 }
 
-export function TransactionTable({ transactions, isLoading, compact }: TransactionTableProps) {
+export function TransactionTable({ transactions, isLoading, compact, onEdit, onDelete }: TransactionTableProps) {
   const { colors } = useTheme()
   const { isMobile } = useBreakpoint()
 
@@ -128,6 +130,24 @@ export function TransactionTable({ transactions, isLoading, compact }: Transacti
                 {tx.type === 0 ? 'Receita' : 'Despesa'}
               </span>
             </div>
+            
+            {/* Actions (if provided) */}
+            {(onEdit || onDelete) && (
+              <div style={{ display: 'flex', gap: '8px', borderLeft: `1px solid ${colors.border}`, paddingLeft: '12px', marginLeft: '12px', alignItems: 'center' }}>
+                <button
+                  onClick={() => onEdit && onEdit(tx)}
+                  style={{ background: 'transparent', border: 'none', color: colors.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  <EditIcon />
+                </button>
+                <button
+                  onClick={() => onDelete && tx.id && onDelete(tx.id)}
+                  style={{ background: 'transparent', border: 'none', color: colors.expense, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -145,6 +165,7 @@ export function TransactionTable({ transactions, isLoading, compact }: Transacti
             <th style={headStyle}>Tipo</th>
             <th style={headStyle}>Data</th>
             <th style={{ ...headStyle, textAlign: 'right' }}>Valor</th>
+            {(onEdit || onDelete) && <th style={headStyle}></th>}
           </tr>
         </thead>
         <tbody>
@@ -202,10 +223,45 @@ export function TransactionTable({ transactions, isLoading, compact }: Transacti
                 {tx.type === 1 ? '- ' : '+ '}
                 {formatCurrency(tx.amount)}
               </td>
+              {(onEdit || onDelete) && (
+                <td style={{ ...cellStyle, textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                    <button
+                      onClick={() => onEdit && onEdit(tx)}
+                      style={{ background: 'transparent', border: 'none', color: colors.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    >
+                      <EditIcon />
+                    </button>
+                    <button
+                      onClick={() => onDelete && tx.id && onDelete(tx.id)}
+                      style={{ background: 'transparent', border: 'none', color: colors.expense, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </div>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   )
+
+  function TrashIcon() {
+    return (
+      <svg width="16" height="16" viewBox="0 0 12 12" fill="none">
+        <path d="M1.5 3h9M4 3V2h4v1M5 5.5v3M7 5.5v3M2.5 3l.5 7h6l.5-7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
+
+  function EditIcon() {
+    return (
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    )
+  }
 }

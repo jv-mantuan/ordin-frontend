@@ -134,7 +134,7 @@ export function CategoriesPage() {
 
       {isCreateModalOpen && (
         <div
-          onClick={closeCreateModal}
+          onPointerDown={(e) => { if (e.target === e.currentTarget) closeCreateModal() }}
           style={{
             position: "fixed",
             inset: 0,

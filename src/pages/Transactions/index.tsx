@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { useTransactions } from '../../hooks/useTransactions'
-import { useCreateTransaction } from '../../hooks/useTransactions'
+import { useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../hooks/useTransactions'
 import { useCategories } from '../../hooks/useCategories'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
@@ -13,6 +12,8 @@ import type { ThemeColors } from '../../context/ThemeContext'
 import { transactionSchema } from '../../schemas/transaction.schema'
 import { transactionsApi } from '../../api/transactions'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
+import type { TransactionWithCategoryNameDto } from '../../types/transaction'
 
 type Filter = 'all' | TransactionType
 
@@ -22,6 +23,7 @@ export function TransactionsPage() {
   const [filter, setFilter] = useState<Filter>('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -33,6 +35,8 @@ export function TransactionsPage() {
   const { data: transactions = [], isLoading } = useTransactions()
   const { data: categories = [], isLoading: catLoading } = useCategories()
   const createTransaction = useCreateTransaction()
+  const updateTransaction = useUpdateTransaction()
+  const deleteTransaction = useDeleteTransaction()
   const queryClient = useQueryClient()
 
   const isSmall = isMobile || isTablet
@@ -48,24 +52,50 @@ export function TransactionsPage() {
   ]
 
   const openCreateModal = () => {
+    setEditingId(null)
     setFormError(null)
     setFormData({
       name: '',
       amount: '',
       type: '0',
-      date: '',
+      date: new Date().toISOString().split('T')[0],
       categoryId: categories[0]?.id ?? '',
     })
     setIsCreateModalOpen(true)
   }
 
-  const closeCreateModal = () => {
-    if (createTransaction.isPending) return
-    setIsCreateModalOpen(false)
+  const handleEdit = (tx: TransactionWithCategoryNameDto) => {
+    setEditingId(tx.id || null)
     setFormError(null)
+    setFormData({
+      name: tx.name,
+      amount: String(tx.amount),
+      type: String(tx.type),
+      date: new Date(tx.date).toISOString().split('T')[0], // Extracting YYYY-MM-DD
+      categoryId: tx.categoryId || '',
+    })
+    setIsCreateModalOpen(true)
   }
 
-  const handleCreateTransaction = async () => {
+  const handleDelete = async (id: string) => {
+    if (confirm('Tem certeza que deseja remover esta transação?')) {
+      try {
+        await deleteTransaction.mutateAsync(id)
+        toast.success('Transação removida com sucesso!')
+      } catch {
+        toast.error('Erro ao remover transação.')
+      }
+    }
+  }
+
+  const closeCreateModal = () => {
+    if (createTransaction.isPending || updateTransaction.isPending) return
+    setIsCreateModalOpen(false)
+    setFormError(null)
+    setEditingId(null)
+  }
+
+  const handleSaveTransaction = async () => {
     const parsed = transactionSchema.safeParse({
       name: formData.name.trim(),
       amount: Number(formData.amount),
@@ -86,7 +116,13 @@ export function TransactionsPage() {
         date: new Date(parsed.data.date),
       }
 
-      await createTransaction.mutateAsync(payload)
+      if (editingId) {
+        await updateTransaction.mutateAsync({ id: editingId, data: payload })
+        toast.success('Transação atualizada com sucesso!')
+      } else {
+        await createTransaction.mutateAsync(payload)
+        toast.success('Transação criada com sucesso!')
+      }
       closeCreateModal()
     } catch (error) {
       const payloadDate = new Date(parsed.data.date).getTime()
@@ -130,6 +166,19 @@ export function TransactionsPage() {
     padding: '12px 14px',
     outline: 'none',
     minHeight: '44px',
+  }
+
+  const selectStyle: React.CSSProperties = {
+    ...inputStyle,
+    cursor: 'pointer',
+    paddingRight: '36px',
+    appearance: 'none',
+    WebkitAppearance: 'none',
+    MozAppearance: 'none',
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23809088' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 14px center',
+    backgroundSize: '16px',
   }
 
   return (
@@ -284,7 +333,12 @@ export function TransactionsPage() {
           borderRadius: radius.lg,
           overflow: 'hidden',
         }}>
-          <TransactionTable transactions={filtered} isLoading={isLoading} />
+          <TransactionTable
+            transactions={filtered}
+            isLoading={isLoading}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
         </div>
         </div>{/* end inner padding wrapper */}
       </main>
@@ -309,7 +363,7 @@ export function TransactionsPage() {
       {/* Create transaction modal */}
       {isCreateModalOpen && (
         <div
-          onClick={closeCreateModal}
+          onPointerDown={(e) => { if (e.target === e.currentTarget) closeCreateModal() }}
           style={{
             position: 'fixed',
             inset: 0,
@@ -344,7 +398,7 @@ export function TransactionsPage() {
             )}
 
             <div style={{ fontSize: '18px', fontWeight: 600, color: colors.textPrimary, marginBottom: '18px' }}>
-              Nova transação
+              {editingId ? 'Editar transação' : 'Nova transação'}
             </div>
 
             <FormField label="Descrição" colors={colors}>
@@ -381,7 +435,7 @@ export function TransactionsPage() {
                     setFormData((current) => ({ ...current, type: event.target.value }))
                     if (formError) setFormError(null)
                   }}
-                  style={inputStyle}
+                  style={selectStyle}
                 >
                   <option value="0">Receita</option>
                   <option value="1">Despesa</option>
@@ -409,7 +463,7 @@ export function TransactionsPage() {
                     setFormData((current) => ({ ...current, categoryId: event.target.value }))
                     if (formError) setFormError(null)
                   }}
-                  style={inputStyle}
+                  style={selectStyle}
                 >
                   <option value="">Selecione</option>
                   {categories.map((category) => (
@@ -428,7 +482,7 @@ export function TransactionsPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
               <button
                 onClick={closeCreateModal}
-                disabled={createTransaction.isPending}
+                disabled={createTransaction.isPending || updateTransaction.isPending}
                 style={{
                   background: colors.bgSurface,
                   border: `1px solid ${colors.border}`,
@@ -437,7 +491,7 @@ export function TransactionsPage() {
                   fontSize: '12px',
                   fontWeight: 500,
                   padding: '8px 14px',
-                  cursor: createTransaction.isPending ? 'not-allowed' : 'pointer',
+                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'not-allowed' : 'pointer',
                   minHeight: '44px',
                   flex: isMobile ? 1 : undefined,
                 }}
@@ -445,8 +499,8 @@ export function TransactionsPage() {
                 Cancelar
               </button>
               <button
-                onClick={() => void handleCreateTransaction()}
-                disabled={createTransaction.isPending}
+                onClick={() => void handleSaveTransaction()}
+                disabled={createTransaction.isPending || updateTransaction.isPending}
                 style={{
                   background: colors.accentGreenMuted,
                   border: `1px solid rgba(90,171,114,0.25)`,
@@ -455,13 +509,13 @@ export function TransactionsPage() {
                   fontSize: '12px',
                   fontWeight: 600,
                   padding: '8px 14px',
-                  cursor: createTransaction.isPending ? 'wait' : 'pointer',
-                  opacity: createTransaction.isPending ? 0.75 : 1,
+                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'not-allowed' : 'pointer',
+                  opacity: (createTransaction.isPending || updateTransaction.isPending) ? 0.75 : 1,
                   minHeight: '44px',
-                  flex: isMobile ? 1 : undefined,
+                  flex: isMobile ? 1.5 : undefined,
                 }}
               >
-                {createTransaction.isPending ? 'Criando...' : 'Criar'}
+                {(createTransaction.isPending || updateTransaction.isPending) ? 'Salvando...' : 'Salvar'}
               </button>
             </div>
           </div>
