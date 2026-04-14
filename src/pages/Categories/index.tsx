@@ -5,18 +5,23 @@ import { CategoryTable } from "../../components/shared/CategoryTable";
 import {
   useCategories,
   useCreateCategory,
+  useUpdateCategory,
   useDeleteCategory,
 } from "../../hooks/useCategories";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { categorySchema } from "../../schemas/category.schema";
 import { radius } from "../../theme";
 import { useTheme } from "../../context/ThemeContext";
 
 export function CategoriesPage() {
   const { colors } = useTheme();
+  const { isMobile } = useBreakpoint();
   const { data: categories = [], isLoading: catLoading } = useCategories();
   const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
   const deleteCatgory = useDeleteCategory();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -28,19 +33,28 @@ export function CategoriesPage() {
   );
 
   const openCreateModal = () => {
+    setEditingId(null);
     setName("");
     setFormError(null);
     setIsCreateModalOpen(true);
   };
 
+  const handleEdit = (category: { id: string; name: string }) => {
+    setEditingId(category.id);
+    setName(category.name);
+    setFormError(null);
+    setIsCreateModalOpen(true);
+  };
+
   const closeCreateModal = () => {
-    if (createCategory.isPending) return;
+    if (createCategory.isPending || updateCategory.isPending) return;
     setIsCreateModalOpen(false);
+    setEditingId(null);
     setName("");
     setFormError(null);
   };
 
-  const handleCreateCategory = async () => {
+  const handleSaveCategory = async () => {
     const parsed = categorySchema.safeParse({ name: name.trim() });
     if (!parsed.success) {
       setFormError(parsed.error.issues[0]?.message ?? "Nome inválido");
@@ -48,13 +62,19 @@ export function CategoriesPage() {
     }
 
     try {
-      await createCategory.mutateAsync(parsed.data);
+      if (editingId) {
+        await updateCategory.mutateAsync({ id: editingId, data: parsed.data });
+        toast.success("Categoria atualizada com sucesso!");
+      } else {
+        await createCategory.mutateAsync(parsed.data);
+        toast.success("Categoria criada com sucesso!");
+      }
       closeCreateModal();
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : "Não foi possível criar a categoria";
+          : "Não foi possível salvar a categoria";
       setFormError(message);
     }
   };
@@ -74,7 +94,13 @@ export function CategoriesPage() {
   return (
     <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
       <main
-        style={{ flex: 1, padding: "24px", overflowY: "auto", minWidth: 0 }}
+        style={{
+          flex: 1,
+          padding: isMobile ? "16px" : "24px",
+          paddingBottom: isMobile ? "76px" : "24px",
+          overflowY: "auto",
+          minWidth: 0,
+        }}
       >
         <TopBar title="Categorias">
           <button
@@ -99,7 +125,7 @@ export function CategoriesPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
             gap: "14px",
             marginBottom: "16px",
           }}
@@ -127,6 +153,7 @@ export function CategoriesPage() {
           <CategoryTable
             categories={categories}
             isLoading={catLoading}
+            onEdit={handleEdit}
             onDelete={(id) => handleDeleteCategory(id)}
           />
         </div>
@@ -140,9 +167,9 @@ export function CategoriesPage() {
             inset: 0,
             background: "rgba(10, 20, 16, 0.72)",
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-end" : "center",
             justifyContent: "center",
-            padding: "24px",
+            padding: isMobile ? "0" : "24px",
             zIndex: 30,
           }}
         >
@@ -150,12 +177,13 @@ export function CategoriesPage() {
             onClick={(event) => event.stopPropagation()}
             style={{
               width: "100%",
-              maxWidth: "420px",
+              maxWidth: isMobile ? "100%" : "420px",
               background: colors.bgCard,
               border: `1px solid ${colors.border}`,
-              borderRadius: radius.xl,
-              padding: "22px",
+              borderRadius: isMobile ? `24px 24px 0 0` : radius.xl,
+              padding: isMobile ? "24px 20px max(env(safe-area-inset-bottom), 24px)" : "22px",
               boxShadow: "0 24px 80px rgba(0, 0, 0, 0.32)",
+              animation: isMobile ? "slideUp 0.25s ease-out forwards" : "fadeContent 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
             }}
           >
             <div
@@ -166,7 +194,7 @@ export function CategoriesPage() {
                 marginBottom: "18px",
               }}
             >
-              Nova categoria
+              {editingId ? "Editar categoria" : "Nova categoria"}
             </div>
 
             <label
@@ -190,7 +218,7 @@ export function CategoriesPage() {
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
-                  void handleCreateCategory();
+                  void handleSaveCategory();
                 }
                 if (event.key === "Escape") {
                   closeCreateModal();
@@ -231,7 +259,7 @@ export function CategoriesPage() {
             >
               <button
                 onClick={closeCreateModal}
-                disabled={createCategory.isPending}
+                disabled={createCategory.isPending || updateCategory.isPending}
                 style={{
                   background: colors.bgSurface,
                   border: `1px solid ${colors.border}`,
@@ -240,14 +268,16 @@ export function CategoriesPage() {
                   fontSize: "12px",
                   fontWeight: 500,
                   padding: "8px 14px",
-                  cursor: createCategory.isPending ? "not-allowed" : "pointer",
+                  minHeight: "44px",
+                  flex: isMobile ? 1 : undefined,
+                  cursor: (createCategory.isPending || updateCategory.isPending) ? "not-allowed" : "pointer",
                 }}
               >
                 Cancelar
               </button>
               <button
-                onClick={() => void handleCreateCategory()}
-                disabled={createCategory.isPending}
+                onClick={() => void handleSaveCategory()}
+                disabled={createCategory.isPending || updateCategory.isPending}
                 style={{
                   background: colors.accentGreenMuted,
                   border: `1px solid rgba(90,171,114,0.25)`,
@@ -256,11 +286,13 @@ export function CategoriesPage() {
                   fontSize: "12px",
                   fontWeight: 600,
                   padding: "8px 14px",
-                  cursor: createCategory.isPending ? "wait" : "pointer",
-                  opacity: createCategory.isPending ? 0.75 : 1,
+                  minHeight: "44px",
+                  flex: isMobile ? 1.5 : undefined,
+                  cursor: (createCategory.isPending || updateCategory.isPending) ? "not-allowed" : "pointer",
+                  opacity: (createCategory.isPending || updateCategory.isPending) ? 0.75 : 1,
                 }}
               >
-                {createCategory.isPending ? "Criando..." : "Criar"}
+                {(createCategory.isPending || updateCategory.isPending) ? "Salvando..." : "Salvar"}
               </button>
             </div>
           </div>
