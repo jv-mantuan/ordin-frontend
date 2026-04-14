@@ -1,5 +1,6 @@
 import { radius, spacing } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 interface TopBarProps {
   title: string
@@ -8,6 +9,7 @@ interface TopBarProps {
 
 export function TopBar({ title, children }: TopBarProps) {
   const { colors, isDark, toggleTheme } = useTheme()
+  const { isMobile } = useBreakpoint()
 
   return (
     <div style={{
@@ -15,54 +17,75 @@ export function TopBar({ title, children }: TopBarProps) {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginBottom: spacing.xl,
+      gap: '8px',
+      minWidth: 0,
     }}>
       <h1 style={{
         margin: 0,
-        fontSize: '18px',
+        fontSize: isMobile ? '16px' : '18px',
         fontWeight: 600,
         color: colors.textPrimary,
         letterSpacing: '-0.02em',
+        // Allow title to shrink so right-side icons are never pushed off screen
+        minWidth: 0,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
       }}>
         {title}
       </h1>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
-        {/* Icons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-          <IconBtn colors={colors}><BellIcon /></IconBtn>
-          <IconBtn colors={colors}><SettingsIcon /></IconBtn>
-          <button
-            onClick={toggleTheme}
-            title={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
-            style={{
-              background: colors.bgCard,
-              border: `1px solid ${colors.border}`,
-              borderRadius: radius.md,
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              color: colors.textSecondary,
-              transition: 'background 0.2s, color 0.2s',
-            }}
-          >
-            {isDark ? <SunIcon /> : <MoonIcon />}
-          </button>
-        </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
+        {/* On mobile: only theme toggle + avatar (no bell/settings) */}
+        {!isMobile && (
+          <>
+            <IconBtn colors={colors}><BellIcon /></IconBtn>
+            <IconBtn colors={colors}><SettingsIcon /></IconBtn>
+          </>
+        )}
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+          style={{
+            background: colors.bgCard,
+            border: `1px solid ${colors.border}`,
+            borderRadius: radius.md,
+            width: isMobile ? '34px' : '32px',
+            height: isMobile ? '34px' : '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: colors.textSecondary,
+            transition: 'background 0.2s, color 0.2s',
+            flexShrink: 0,
+          }}
+        >
+          {isDark ? <SunIcon /> : <MoonIcon />}
+        </button>
 
         {/* Avatar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-          <div style={{
-            width: '30px', height: '30px', borderRadius: '50%',
-            background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '11px', fontWeight: 600, color: colors.white,
-          }}>AM</div>
-          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>André Martins</span>
-        </div>
+        <div style={{
+          width: isMobile ? '34px' : '30px',
+          height: isMobile ? '34px' : '30px',
+          borderRadius: '50%',
+          background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '11px',
+          fontWeight: 600,
+          color: colors.white,
+          flexShrink: 0,
+        }}>AM</div>
 
+        {!isMobile && (
+          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>André Martins</span>
+        )}
+
+        {/* Page-level action slot (e.g. "+ Nova transação") */}
         {children}
       </div>
     </div>
@@ -103,7 +126,6 @@ function MoonIcon() {
 }
 
 function SettingsIcon() {
-  // regular pointy-top hexagon, r=5.5, centered at (7,7)
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <path d="M7 1.5L11.76 4.25V9.75L7 12.5L2.24 9.75V4.25Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>

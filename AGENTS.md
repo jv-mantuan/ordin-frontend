@@ -127,6 +127,53 @@ O interceptor de resposta em `client.ts` extrai `{ message, requestId }` nos err
 - Se o componente precisar de `isDark` para variações visuais (ex.: gradientes diferentes por tema), usar `const { colors, isDark } = useTheme()`.
 - Quando nenhuma instrução de estilo for fornecida, aplicar as cores via `useTheme()` automaticamente — nunca hardcodar valores hexadecimais nem usar paletas externas.
 
+## Mobile-First
+
+**Este aplicativo é mobile-first.** Todo design, layout e componente novo deve ser concebido primeiro para telas pequenas (≥ 375 px) e escalado progressivamente para tablet e desktop. Violar esse princípio é inaceitável.
+
+### Breakpoints oficiais
+
+| Token | Largura | Descrição |
+|-------|---------|-----------|
+| `isMobile` | `< 768 px` | Smartphones — layout de prioridade máxima |
+| `isTablet` | `768–1023 px` | Tablets — layout intermediário |
+| _(desktop)_ | `≥ 1024 px` | Desktops — layout completo |
+
+### Como aplicar breakpoints
+
+- **Sempre use o hook `useBreakpoint()`** de `src/hooks/useBreakpoint.ts` para obter `isMobile` e `isTablet`.
+- Nunca usar `window.innerWidth` diretamente ou condicionais manuais de `matchMedia` — use o hook.
+- Estilos inline: calcule valores com base nas flags do hook:
+  ```tsx
+  const { isMobile } = useBreakpoint()
+  padding: isMobile ? '16px' : '30px'
+  ```
+
+### Regras de layout mobile
+
+- **Sidebars laterais** (`Sidebar`, `CategoryPanel`) **não aparecem em mobile** — a navegação migra para a `BottomNav` fixa no rodapé.
+- **Grids multi-coluna** colapsam para 1 coluna em mobile.
+- **Tabelas** (`TransactionTable`) viram listas de cards em mobile — não usar scroll horizontal em telas pequenas.
+- **Painéis laterais** (ex.: `CategoryPanel`) viram bottom sheets (`position: fixed`, deslizam de baixo) em mobile.
+- **Padding de páginas**: `16px` em mobile, `24px` em tablet, `30px` em desktop.
+- **Tipografia de valores**: `font-size` de cards stat reduz de `36px` para `28px` em mobile.
+- Todo elemento clicável deve ter `min-height: 44px` (alvo de toque mínimo recomendado pela Apple HIG/WCAG).
+
+### Componentes de navegação mobile
+
+- `BottomNav` (`src/components/shared/BottomNav.tsx`): barra fixa no rodapé, height `60px`, `z-index: 50`. Visível apenas em mobile.
+- Quando `BottomNav` estiver visível, o `<main>` deve ter `paddingBottom: '76px'` para não sobrepor conteúdo.
+
+### Checklist ao criar/editar qualquer componente
+
+1. Comece pelo layout mobile (375 px).
+2. Adapte para tablet (768 px).
+3. Expanda para desktop (1024 px+).
+4. Teste alvos de toque (botões ≥ 44 px de altura).
+5. Teste scroll vertical — nunca depender de scroll horizontal em mobile.
+
+---
+
 ## Hard Rules
 
 - Do not add sections, features, or content not in the reference
@@ -136,3 +183,4 @@ O interceptor de resposta em `client.ts` extrai `{ message, requestId }` nos err
 - Do not use default Tailwind blue/indigo as primary color
 - In dashboard layouts, cards that share the same row must keep the same visual height; avoid any row-level misalignment between cards such as the bar chart and donut card.
 - Standardize card title typography across comparable dashboard cards; chart and summary card titles should not drift in size or hierarchy unless explicitly requested.
+- **Mobile-first always:** never design a layout for desktop first and add a mobile fallback — start from the smallest screen.

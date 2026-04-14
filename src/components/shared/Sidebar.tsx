@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { radius, spacing } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
+import { useBreakpoint } from '../../hooks/useBreakpoint'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: <GridIcon /> },
@@ -10,6 +11,9 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const { colors } = useTheme()
+  const { isMobile } = useBreakpoint()
+
+  if (isMobile) return null
 
   return (
     <aside style={{
