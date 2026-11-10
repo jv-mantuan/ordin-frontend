@@ -28,3 +28,22 @@ export const codeSchema = z.object({
 
 export type CodeFormInput = z.input<typeof codeSchema>
 export type CodeFormData = z.output<typeof codeSchema>
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().min(1, 'E-mail é obrigatório').email('E-mail inválido'),
+})
+
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
+
+export const resetPasswordSchema = codeSchema
+  .extend({
+    password: z.string().min(PASSWORD_MIN, `A senha deve ter ao menos ${PASSWORD_MIN} caracteres`),
+    confirmPassword: z.string().min(1, 'Confirme a nova senha'),
+  })
+  .refine((v) => v.password === v.confirmPassword, {
+    message: 'As senhas não conferem.',
+    path: ['confirmPassword'],
+  })
+
+export type ResetPasswordFormInput = z.input<typeof resetPasswordSchema>
+export type ResetPasswordFormData = z.output<typeof resetPasswordSchema>
