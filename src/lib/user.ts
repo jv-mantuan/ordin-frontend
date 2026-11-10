@@ -1,14 +1,13 @@
-import type { User } from '@supabase/supabase-js'
+import type { AuthUser } from '../context/AuthContext'
 
-/** Human-readable name: user_metadata.name if present, else the email. */
-export function displayName(user: User | null): string {
+/** Human-readable name: the account name if present, else the email. */
+export function displayName(user: AuthUser | null): string {
   if (!user) return ''
-  const name = (user.user_metadata?.name as string | undefined)?.trim()
-  return name || user.email || ''
+  return user.name.trim() || user.email || ''
 }
 
 /** Up to two uppercase initials for avatars. */
-export function initials(user: User | null): string {
+export function initials(user: AuthUser | null): string {
   const name = displayName(user)
   if (!name) return '?'
   const parts = name.split(/\s+/).filter(Boolean)
