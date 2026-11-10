@@ -32,8 +32,24 @@ Two tsconfig files via project references:
 
 ## Environment Variables
 
-- `VITE_API_URL` — base URL do backend (default: `https://localhost:54732`)
-- Criar `.env.local` para sobrescrever localmente.
+- `VITE_API_URL` — base URL do backend (default: `https://localhost:54732`; a API NestJS roda em `http://localhost:3000`)
+- `VITE_NEON_AUTH_URL` — Auth URL do Neon Auth (Neon Console → Auth → Configuration; uma por branch — use a branch `dev` localmente)
+- Criar `.env.local` para sobrescrever localmente (ver `.env.example`).
+
+## Auth (Neon Auth)
+
+- **Cliente:** `src/lib/auth.ts` — `@neon/auth` com `BetterAuthVanillaAdapter`. A sessão fica num cookie HttpOnly no domínio do Neon.
+  - O JWT para a API vem de `getSession().data.session.token`, guardado em cache até ~60 s antes de expirar (15 min).
+  - Não usar `getJWTToken()`, que chama `/get-jwt-token` e dá 404, nem `token()`, que devolve a sessão.
+  - O SDK lança `AuthApiError` com um `code` no estilo Supabase. O código original do Better Auth (ex.: `INVALID_OTP`) fica em `error.error.code`; o `attempt()` normaliza isso.
+- **Contexto:** `useAuth()` (`src/context/AuthContext.tsx`) é a única superfície de auth para componentes. Os tipos são do app (`AuthUser`), não do SDK.
+  - Ações: `signIn`, `signUp`, `signOut`, `signInWithGoogle`, `verifyEmail`, `resendVerificationCode`, `requestPasswordReset`, `resetPassword`.
+  - Mensagens de erro pt-BR em `mapAuthError` (`AuthProvider.tsx`).
+- **API:** `src/api/client.ts` manda `Authorization: Bearer <jwt>`.
+  - Num 401, renova o token e tenta de novo **uma** vez.
+  - O 403 de união de contas insegura vira toast e redireciona para `/esqueci-senha`.
+- **Códigos:** 6 dígitos, valem **~5 min** (o e-mail diz 10). O login com e-mail não confirmado **não** reenvia código, então o `signIn` chama `sendVerificationOtp` antes de ir para `/verificar-email`.
+- **Google:** `signIn.social` com `errorCallbackURL: /login`. A tela de login traduz `?error=` (ex.: `account_not_linked`).
 
 ## Architecture
 
@@ -62,6 +78,9 @@ src/
 | `/categorias`   | `TransactionsPage` (placeholder)  |
 | `/receitas`     | `TransactionsPage` (placeholder)  |
 | `/configuracoes`| `PlaceholderPage`                 |
+| `/login`, `/signup` | públicas (Google + e-mail/senha) |
+| `/verificar-email` | pública — código de 6 dígitos (email no `location.state`) |
+| `/esqueci-senha`, `/redefinir-senha` | públicas — reset de senha por código |
 
 ### API contract
 
