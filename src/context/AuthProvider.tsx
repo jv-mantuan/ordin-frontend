@@ -82,7 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signInWithGoogle = useCallback(async () => {
-    await attempt(() => authClient.signIn.social({ provider: 'google', callbackURL: `${window.location.origin}/` }))
+    // On failure (e.g. account_not_linked) Neon redirects to errorCallbackURL with ?error=<code>.
+    await attempt(() =>
+      authClient.signIn.social({
+        provider: 'google',
+        callbackURL: `${window.location.origin}/`,
+        errorCallbackURL: `${window.location.origin}/login`,
+      }),
+    )
   }, [])
 
   const verifyEmail = useCallback(

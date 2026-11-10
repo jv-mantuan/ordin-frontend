@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { loginSchema, type LoginFormData } from '../../schemas/auth.schema'
 import { useAuth } from '../../context/AuthContext'
@@ -15,6 +16,15 @@ export function LoginPage() {
   const { signIn, signInWithGoogle, session, loading } = useAuth()
   const { colors } = useTheme()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const oauthError = searchParams.get('error')
+
+  // Google sign-in failures come back as /login?error=<code> (errorCallbackURL).
+  useEffect(() => {
+    if (!oauthError) return
+    toast.error(googleErrorMessage(oauthError), { toastId: `oauth-${oauthError}`, autoClose: 10000 })
+    setSearchParams({}, { replace: true })
+  }, [oauthError, setSearchParams])
   const {
     register,
     handleSubmit,
@@ -85,4 +95,12 @@ export function LoginPage() {
       </div>
     </AuthLayout>
   )
+}
+
+function googleErrorMessage(code: string): string {
+  if (code === 'account_not_linked') {
+    return 'Este e-mail já tem uma conta com senha que ainda não foi confirmada. Use “Esqueci minha senha” para definir uma senha e confirmar o e-mail, e depois entre com o Google.'
+  }
+  if (code === 'access_denied') return 'Login com o Google cancelado.'
+  return 'Não foi possível entrar com o Google. Tente novamente.'
 }
