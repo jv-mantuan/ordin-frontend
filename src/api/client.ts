@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { supabase } from '../lib/supabase'
 
 export interface ApiResponse<T> {
   data: T
@@ -9,12 +10,14 @@ export interface ApiResponse<T> {
 }
 
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5000',
+  baseURL: import.meta.env.VITE_API_URL ?? 'https://localhost:54732',
   headers: { 'Content-Type': 'application/json' },
 })
 
-client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+// Token comes from the Supabase session (auto-refreshed by the SDK) — single source of truth.
+client.interceptors.request.use(async (config) => {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }

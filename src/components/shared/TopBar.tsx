@@ -1,6 +1,9 @@
+import { useNavigate } from 'react-router-dom'
 import { radius, spacing } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
+import { useAuth } from '../../context/AuthContext'
+import { displayName, initials } from '../../lib/user'
 
 interface TopBarProps {
   title: string
@@ -10,6 +13,13 @@ interface TopBarProps {
 export function TopBar({ title, children }: TopBarProps) {
   const { colors, isDark, toggleTheme } = useTheme()
   const { isMobile } = useBreakpoint()
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
 
   return (
     <div style={{
@@ -73,11 +83,33 @@ export function TopBar({ title, children }: TopBarProps) {
           fontWeight: 600,
           color: colors.white,
           flexShrink: 0,
-        }}>JV</div>
+        }}>{initials(user)}</div>
 
         {!isMobile && (
-          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>João Victor</span>
+          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>{displayName(user)}</span>
         )}
+
+        {/* Logout */}
+        <button
+          onClick={handleSignOut}
+          title="Sair"
+          aria-label="Sair"
+          style={{
+            background: colors.bgCard,
+            border: `1px solid ${colors.border}`,
+            borderRadius: radius.md,
+            width: isMobile ? '34px' : '32px',
+            height: isMobile ? '34px' : '32px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            color: colors.textSecondary,
+            flexShrink: 0,
+          }}
+        >
+          <LogoutIcon />
+        </button>
 
         {/* Page-level action slot (e.g. "+ Nova transação") */}
         {children}
@@ -116,6 +148,14 @@ function MoonIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <path d="M11.5 9A5 5 0 015 2.5a.5.5 0 00-.6.6A5 5 0 1011 10a.5.5 0 00.5-.6z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M5.5 1.5H2.5a1 1 0 00-1 1v9a1 1 0 001 1h3M9 4l3 3-3 3M12 7H5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
