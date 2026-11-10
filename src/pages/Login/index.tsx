@@ -8,9 +8,11 @@ import { useTheme } from '../../context/ThemeContext'
 import { AuthLayout } from '../../components/auth/AuthLayout'
 import { AuthField } from '../../components/auth/AuthField'
 import { AuthButton } from '../../components/auth/AuthButton'
+import { AuthDivider } from '../../components/auth/AuthDivider'
+import { GoogleButton } from '../../components/auth/GoogleButton'
 
 export function LoginPage() {
-  const { signIn, session, loading } = useAuth()
+  const { signIn, signInWithGoogle, session, loading } = useAuth()
   const { colors } = useTheme()
   const navigate = useNavigate()
   const {
@@ -22,7 +24,12 @@ export function LoginPage() {
   if (!loading && session) return <Navigate to="/" replace />
 
   const onSubmit = async (values: LoginFormData) => {
-    const { error } = await signIn(values.email, values.password)
+    const { error, needsVerification } = await signIn(values.email, values.password)
+    if (needsVerification) {
+      toast.info('Confirme seu e-mail: enviamos um novo código.')
+      navigate('/verificar-email', { state: { email: values.email } })
+      return
+    }
     if (error) {
       toast.error(error)
       return
@@ -43,27 +50,39 @@ export function LoginPage() {
         </>
       }
     >
-      <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} noValidate>
-        <AuthField
-          label="E-mail"
-          type="email"
-          autoComplete="email"
-          placeholder="voce@exemplo.com"
-          error={errors.email?.message}
-          {...register('email')}
-        />
-        <AuthField
-          label="Senha"
-          type="password"
-          autoComplete="current-password"
-          placeholder="••••••••"
-          error={errors.password?.message}
-          {...register('password')}
-        />
-        <AuthButton type="submit" loading={isSubmitting} style={{ marginTop: '4px' }}>
-          {isSubmitting ? 'Entrando…' : 'Entrar'}
-        </AuthButton>
-      </form>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <GoogleButton label="Entrar com Google" onClick={signInWithGoogle} disabled={isSubmitting} />
+        <AuthDivider />
+        <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} noValidate>
+          <AuthField
+            label="E-mail"
+            type="email"
+            autoComplete="email"
+            placeholder="voce@exemplo.com"
+            error={errors.email?.message}
+            {...register('email')}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <AuthField
+              label="Senha"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              error={errors.password?.message}
+              {...register('password')}
+            />
+            <Link
+              to="/esqueci-senha"
+              style={{ alignSelf: 'flex-end', fontSize: '13px', color: colors.accentGreenBright, fontWeight: 500 }}
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
+          <AuthButton type="submit" loading={isSubmitting} style={{ marginTop: '4px' }}>
+            {isSubmitting ? 'Entrando…' : 'Entrar'}
+          </AuthButton>
+        </form>
+      </div>
     </AuthLayout>
   )
 }

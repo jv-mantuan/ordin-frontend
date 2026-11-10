@@ -6,6 +6,7 @@ import { TransactionsPage } from './pages/Transactions'
 import { CategoriesPage } from './pages/Categories'
 import { LoginPage } from './pages/Login'
 import { SignupPage } from './pages/Signup'
+import { VerifyEmailPage } from './pages/VerifyEmail'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { ThemeProvider } from './context/ThemeProvider'
 import { AuthProvider } from './context/AuthProvider'
@@ -22,6 +23,7 @@ export default function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/verificar-email" element={<VerifyEmailPage />} />
             <Route
               path="/*"
               element={
