@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { toast } from 'react-toastify'
-import { getAccessToken, invalidateAccessToken } from '../lib/auth'
+import { getAccessToken } from '../lib/auth'
 
 /** Exact message of the backend's 403 for an unsafe account link (must match the API). */
 export const ACCOUNT_LINKING_MESSAGE = 'Por segurança, redefina sua senha em "Esqueci minha senha" para continuar.'
@@ -23,6 +23,9 @@ client.interceptors.request.use(async (config) => {
   const token = await getAccessToken()
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
+  } else {
+    // A retried request must not carry the stale token from its first attempt.
+    delete config.headers.Authorization
   }
   return config
 })
@@ -36,7 +39,8 @@ client.interceptors.response.use(
     // A 401 can mean the cached JWT just expired or was revoked: fetch a fresh one and retry once.
     if (error.response?.status === 401 && config && !config._authRetried) {
       config._authRetried = true
-      invalidateAccessToken()
+      // Go to the network: the SDK would otherwise hand back the same cached JWT.
+      await getAccessToken({ forceRefresh: true })
       return client(config)
     }
     const requestId = error.response?.data?.metadata?.requestId

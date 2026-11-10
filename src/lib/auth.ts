@@ -81,19 +81,33 @@ export function invalidateAccessToken(): void {
   cached = null
 }
 
-/** A JWT to send as `Authorization: Bearer`, or null when signed out. Concurrent calls share one fetch. */
-export async function getAccessToken(): Promise<string | null> {
+/**
+ * A JWT to send as `Authorization: Bearer`, or null when signed out. Concurrent calls share one fetch.
+ * `forceRefresh` skips both our cache and the SDK's session cache (use after the API answered 401).
+ */
+export async function getAccessToken(opts: { forceRefresh?: boolean } = {}): Promise<string | null> {
+  if (opts.forceRefresh) {
+    cached = null
+    inFlight = fetchToken(true).finally(() => {
+      inFlight = null
+    })
+    return inFlight
+  }
   if (cached && cached.exp - REFRESH_MARGIN_S > Date.now() / 1000) return cached.token
-  inFlight ??= fetchToken().finally(() => {
+  inFlight ??= fetchToken(false).finally(() => {
     inFlight = null
   })
   return inFlight
 }
 
-async function fetchToken(): Promise<string | null> {
+/** The SDK honours this header in its fetch layer and bypasses its in-memory session cache. */
+const FORCE_FETCH = { fetchOptions: { headers: { 'X-Force-Fetch': '1' } } }
+
+async function fetchToken(force: boolean): Promise<string | null> {
   // The Neon adapter puts the JWT (from the set-auth-jwt header) in session.token and refreshes it.
   // Its getJWTToken() hits /get-jwt-token (404 on this server) and token() returns the session.
-  const { data } = await attempt(() => authClient.getSession())
+  // Without force, getSession() is served from the SDK's cache until ~10 s before the JWT expires.
+  const { data } = await attempt(() => (force ? authClient.getSession(FORCE_FETCH) : authClient.getSession()))
   const raw = (data as { session?: { token?: unknown } } | null)?.session?.token
   const token = typeof raw === 'string' && raw.split('.').length === 3 ? raw : null
   if (!token) {
