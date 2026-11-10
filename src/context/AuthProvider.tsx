@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { attempt, authClient, invalidateAccessToken, type AuthFailure } from '../lib/auth'
 import { AuthContext, type AuthSession, type AuthUser } from './AuthContext'
 
@@ -24,6 +25,7 @@ async function readSession(): Promise<AuthSession | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null)
   const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
 
   /** Re-reads the session from Neon Auth (cookie-based) and mirrors it in React state. */
   const refreshSession = useCallback(async () => {
@@ -78,8 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     await attempt(() => authClient.signOut())
     invalidateAccessToken()
+    // Drop the previous user's cached API data so the next user in this tab never sees it.
+    queryClient.clear()
     setSession(null)
-  }, [])
+  }, [queryClient])
 
   const signInWithGoogle = useCallback(async () => {
     // On failure (e.g. account_not_linked) Neon redirects to errorCallbackURL with ?error=<code>.
