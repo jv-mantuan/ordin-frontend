@@ -77,7 +77,9 @@ export function ServiceFormModal({ service, isSaving, onClose, onSubmit }: Servi
     try {
       await onSubmit({ ...d, clientName: d.clientName || null, notes: d.notes || null })
     } catch (e) {
-      setError(e instanceof Error && e.message ? e.message : 'Não foi possível salvar o serviço')
+      // The API client rejects with a plain { message, requestId }, not an Error.
+      const message = typeof e === 'object' && e !== null && 'message' in e ? String(e.message) : ''
+      setError(message || 'Não foi possível salvar o serviço')
     }
   }
 

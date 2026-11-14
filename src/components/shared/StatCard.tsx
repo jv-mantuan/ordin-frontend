@@ -59,23 +59,36 @@ export function StatCard({ label, value, accent, sub, info, icon, valueSize = 36
 }
 
 /**
- * "i" button with a tooltip. Hover/focus opens it on desktop; a tap toggles it on touch screens.
+ * "i" button with a tooltip.
+ * - Mouse: opens on hover; stays open while the pointer is on the button or the tooltip (WCAG 1.4.13).
+ * - Touch / click / keyboard: each activation toggles it.
+ * - Esc or a tap outside closes it. Keyboard focus also shows it.
  * The tooltip spans the card width (positioned against the card), so it never overflows a narrow screen.
  */
+type TipState = 'closed' | 'hover' | 'pinned'
+
 function InfoTip({ label, text }: { label: string; text: string }) {
   const { colors, isDark } = useTheme()
-  const [open, setOpen] = useState(false)
-  const [pinned, setPinned] = useState(false)
+  const [state, setState] = useState<TipState>('closed')
   const wrapRef = useRef<HTMLSpanElement>(null)
+  const closeTimer = useRef<number | undefined>(undefined)
   const tipId = useId()
-  const visible = open || pinned
+  const visible = state !== 'closed'
+
+  const cancelClose = () => window.clearTimeout(closeTimer.current)
+  const softOpen = () => { cancelClose(); setState((s) => (s === 'closed' ? 'hover' : s)) }
+  const softClose = () => {
+    cancelClose()
+    closeTimer.current = window.setTimeout(() => setState((s) => (s === 'hover' ? 'closed' : s)), 150)
+  }
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), [])
 
   useEffect(() => {
     if (!visible) return
-    const close = () => { setOpen(false); setPinned(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setState('closed') }
     const onPointer = (e: PointerEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) close()
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setState('closed')
     }
     document.addEventListener('keydown', onKey)
     document.addEventListener('pointerdown', onPointer)
@@ -86,24 +99,27 @@ function InfoTip({ label, text }: { label: string; text: string }) {
   }, [visible])
 
   return (
-    <span ref={wrapRef} style={{ display: 'inline-flex', marginLeft: 'auto', flexShrink: 0 }}>
+    <span
+      ref={wrapRef}
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') softOpen() }}
+      onPointerLeave={(e) => { if (e.pointerType === 'mouse') softClose() }}
+      style={{ display: 'inline-flex', marginLeft: 'auto', flexShrink: 0 }}
+    >
       <button
         type="button"
         className="stat-info-btn"
         aria-label={`Sobre ${label}`}
         aria-expanded={visible}
         aria-describedby={visible ? tipId : undefined}
-        onClick={() => setPinned((p) => !p)}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
+        // A tap fires focus before click: focus shows it as "hover", the click pins it,
+        // and the next tap (no new focus) closes it.
+        onClick={() => { cancelClose(); setState((s) => (s === 'pinned' ? 'closed' : 'pinned')) }}
+        onFocus={(e) => { if (e.target.matches(':focus-visible')) softOpen() }}
+        onBlur={() => setState((s) => (s === 'hover' ? 'closed' : s))}
         style={{
           width: '44px', height: '44px', margin: '-10px -12px -10px 0',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'transparent', border: 'none', borderRadius: radius.full,
-          color: visible ? colors.accentGreenBright : colors.textMuted, cursor: 'pointer',
-          transition: 'color 0.15s, transform 0.1s',
+          background: 'transparent', border: 'none', borderRadius: radius.full, cursor: 'pointer',
         }}
       >
         <InfoIcon />
@@ -127,7 +143,9 @@ function InfoTip({ label, text }: { label: string; text: string }) {
         </span>
       )}
       <style>{`
+        .stat-info-btn { color: ${colors.textMuted}; transition: color 0.15s, transform 0.1s; }
         .stat-info-btn:hover { color: ${colors.textSecondary}; }
+        .stat-info-btn[aria-expanded="true"] { color: ${colors.accentGreenBright}; }
         .stat-info-btn:focus-visible { outline: 2px solid ${colors.accentGreenBright}; outline-offset: -6px; }
         .stat-info-btn:active { transform: scale(0.92); }
       `}</style>

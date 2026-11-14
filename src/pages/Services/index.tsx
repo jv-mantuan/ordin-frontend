@@ -19,6 +19,7 @@ import {
 import { computeServiceMetrics, SERVICE_METRIC_INFO, type ServiceMetrics } from '../../lib/serviceMetrics'
 import { formatBRL } from '../../lib/money'
 import { todayISO } from '../../lib/date'
+import { useToday } from '../../hooks/useToday'
 import type { ServiceDto, ServiceRequest, ServiceStatus } from '../../types/service'
 
 type Filter = ServiceStatus | 'all'
@@ -47,6 +48,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 export function ServicesPage() {
   const { colors } = useTheme()
   const { isMobile, isTablet } = useBreakpoint()
+  const isDesktop = !isMobile && !isTablet
   const [filter, setFilter] = useState<Filter>('scheduled')
   const [modal, setModal] = useState<{ service: ServiceDto | null } | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -59,7 +61,7 @@ export function ServicesPage() {
   const reopenService = useReopenService()
   const completeBatch = useCompleteServicesBatch()
 
-  const today = todayISO()
+  const today = useToday()
   const metrics = useMemo(() => computeServiceMetrics(services), [services])
   const todayIds = useMemo(
     () => services.filter((s) => s.status === 'scheduled' && s.date === today).map((s) => s.id),
@@ -97,10 +99,16 @@ export function ServicesPage() {
   }
 
   const handleCompleteToday = async () => {
-    if (todayIds.length === 0) return
-    if (!confirm(`Concluir ${plural(todayIds.length, 'serviço', 'serviços')} de hoje?`)) return
+    // Recomputed at click time: never trust a "today" captured before midnight.
+    const now = todayISO()
+    const ids = services.filter((s) => s.status === 'scheduled' && s.date === now).map((s) => s.id)
+    if (ids.length === 0) {
+      toast.info('Nenhum serviço agendado para hoje.')
+      return
+    }
+    if (!confirm(`Concluir ${plural(ids.length, 'serviço', 'serviços')} de hoje?`)) return
     try {
-      const done = await completeBatch.mutateAsync(todayIds)
+      const done = await completeBatch.mutateAsync(ids)
       if (done.length === 0) toast.info('Nenhum serviço de hoje estava agendado.')
       else toast.success(plural(done.length, 'serviço concluído', 'serviços concluídos'))
     } catch (e) {
@@ -212,7 +220,7 @@ export function ServicesPage() {
                 <StatCard
                   label={SERVICE_METRIC_INFO[key].label}
                   info={SERVICE_METRIC_INFO[key].info}
-                  value={isLoading ? '—' : formatBRL(metrics[key])}
+                  value={isLoading || isError ? '—' : formatBRL(metrics[key])}
                   accent={accent}
                   icon={null}
                   valueSize={isMobile ? 28 : 30}
@@ -240,7 +248,7 @@ export function ServicesPage() {
                     fontWeight: active ? 500 : 400,
                     padding: '0 16px',
                     cursor: 'pointer',
-                    minHeight: isMobile ? '44px' : '36px',
+                    minHeight: isDesktop ? '36px' : '44px',
                     transition: 'background 0.15s, color 0.15s',
                   }}
                 >

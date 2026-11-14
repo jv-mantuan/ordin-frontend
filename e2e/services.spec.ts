@@ -140,3 +140,89 @@ test('metric cards explain themselves', async ({ page }) => {
   await page.keyboard.press('Escape')
   await expect(page.getByRole('tooltip')).toHaveCount(0)
 })
+
+test.describe('review fixes', () => {
+  test('a page left open past midnight stops treating yesterday as today', async ({ page, request }, testInfo) => {
+    await page.clock.install({ time: new Date(2030, 2, 10, 23, 58) })
+    const svc = await createServiceViaApi(request, { name: uniqueName(testInfo, 'Meia-noite'), date: '2030-03-10' })
+
+    await page.goto('/servicos')
+    await showFilter(page, 'Todos')
+    const row = page.getByTestId(`service-${svc.id}`)
+    await expect(row.getByText('Hoje', { exact: true })).toBeVisible()
+
+    await page.clock.runFor('05:00')
+    await expect(row.getByText('Hoje', { exact: true })).toHaveCount(0)
+    await expect(row.getByText('Atrasado', { exact: true })).toBeVisible()
+  })
+
+  test("shows the server's error message in the form", async ({ page }, testInfo) => {
+    await page.route('**/v1/services', (route) =>
+      route.request().method() === 'POST'
+        ? route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ message: 'Mensagem do servidor' }) })
+        : route.fallback(),
+    )
+    await page.goto('/servicos')
+    await page.getByRole('button', { name: '+ Novo serviço' }).click()
+    await page.getByLabel('Nome').fill(uniqueName(testInfo, 'Erro'))
+    await page.getByLabel('Data').fill('2030-01-15')
+    await page.getByLabel('Valor', { exact: true }).fill('100')
+    await page.getByRole('button', { name: 'Salvar' }).click()
+    await expect(page.getByText('Mensagem do servidor')).toBeVisible()
+  })
+
+  test('rejects an amount above the maximum before calling the API', async ({ page }, testInfo) => {
+    await page.goto('/servicos')
+    await page.getByRole('button', { name: '+ Novo serviço' }).click()
+    await page.getByLabel('Nome').fill(uniqueName(testInfo, 'Enorme'))
+    await page.getByLabel('Data').fill('2030-01-15')
+    await page.getByLabel('Valor', { exact: true }).fill('99999999999999')
+    await page.getByRole('button', { name: 'Salvar' }).click()
+    await expect(page.getByText('Valor acima do máximo permitido')).toBeVisible()
+  })
+
+  test('a second tap on the info button closes the tooltip', async ({ page }, testInfo) => {
+    test.skip(!testInfo.project.use.hasTouch, 'touch only')
+    await page.goto('/servicos')
+    const info = page.getByRole('button', { name: 'Sobre A receber' })
+    await info.tap()
+    await expect(page.getByRole('tooltip')).toBeVisible()
+    await info.tap()
+    await expect(page.getByRole('tooltip')).toHaveCount(0)
+  })
+
+  test('the tooltip stays open while the pointer moves onto it', async ({ page }, testInfo) => {
+    test.skip(!!testInfo.project.use.hasTouch, 'mouse only')
+    await page.goto('/servicos')
+    await page.getByRole('button', { name: 'Sobre A receber' }).hover()
+    const tip = page.getByRole('tooltip')
+    await expect(tip).toBeVisible()
+    await tip.hover()
+    await page.waitForTimeout(400)
+    await expect(tip).toBeVisible()
+  })
+
+  test('touch targets are at least 44px on tablets', async ({ page, request }, testInfo) => {
+    await createServiceViaApi(request, { name: uniqueName(testInfo, 'Tablet'), date: '2030-01-15' })
+    await page.setViewportSize({ width: 800, height: 1100 })
+    await page.goto('/servicos')
+    for (const name of ['Agendados', 'Todos']) {
+      const box = await page.getByRole('button', { name, exact: true }).boundingBox()
+      expect(box!.height).toBeGreaterThanOrEqual(44)
+    }
+    const action = await page.getByRole('button', { name: /^Editar / }).first().boundingBox()
+    expect(action!.height).toBeGreaterThanOrEqual(44)
+  })
+
+  test('metric cards show a dash, not zero, when the list fails to load', async ({ page }) => {
+    await page.route('**/v1/services', (route) =>
+      route.request().method() === 'GET'
+        ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'falhou' }) })
+        : route.fallback(),
+    )
+    await page.goto('/servicos')
+    await expect(page.getByText('Não foi possível carregar os serviços', { exact: false })).toBeVisible()
+    const summary = page.getByRole('region', { name: 'Resumo dos serviços' })
+    await expect(summary.getByText('R$ 0,00')).toHaveCount(0)
+  })
+})

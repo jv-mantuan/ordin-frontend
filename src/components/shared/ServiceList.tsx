@@ -243,9 +243,12 @@ function StatusBadge({ status }: { status: ServiceStatus }) {
 
 function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busyId, big }: Omit<RowProps, 'today'> & { big?: boolean }) {
   const { colors } = useTheme()
+  const { isTablet } = useBreakpoint()
   const busy = busyId === s.id
+  // Touch screens (phones and tablets) get 44px targets.
+  const touch = big || isTablet
   const base: React.CSSProperties = {
-    minHeight: big ? '44px' : '36px',
+    minHeight: touch ? '44px' : '36px',
     padding: big ? '0 14px' : '0 12px',
     flex: big ? 1 : undefined,
     borderRadius: radius.md,

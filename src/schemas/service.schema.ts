@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/** Same ceiling as the API (numeric(18,2)). */
+export const MAX_AMOUNT = 9_999_999_999_999.99
+
 export const RECEIVED_ABOVE_AMOUNT = 'O valor recebido não pode ser maior que o valor do serviço'
 
 const money = (label: string) =>
@@ -7,6 +10,7 @@ const money = (label: string) =>
     .number({ error: `${label} inválido` })
     .refine(Number.isFinite, `${label} inválido`)
     .refine((n) => n >= 0, `${label} não pode ser negativo`)
+    .refine((n) => n <= MAX_AMOUNT, `${label} acima do máximo permitido`)
 
 /** Validates the service form after the pt-BR money strings were parsed (blank optional amounts → 0). */
 export const serviceSchema = z
