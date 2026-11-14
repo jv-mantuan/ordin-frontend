@@ -9,6 +9,7 @@ import { radius } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
 import type { ThemeColors } from '../../context/ThemeContext'
 import { transactionSchema } from '../../schemas/transaction.schema'
+import { formatAmountInput, parseAmount } from '../../lib/money'
 import { transactionsApi } from '../../api/transactions'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
@@ -67,7 +68,7 @@ export function TransactionsPage() {
     setFormError(null)
     setFormData({
       name: tx.name,
-      amount: String(tx.amount),
+      amount: formatAmountInput(Number(tx.amount)),
       type: String(tx.type),
       date: new Date(tx.date).toISOString().split('T')[0], // Extracting YYYY-MM-DD
       categoryId: tx.categoryId || '',
@@ -96,7 +97,7 @@ export function TransactionsPage() {
   const handleSaveTransaction = async () => {
     const parsed = transactionSchema.safeParse({
       name: formData.name.trim(),
-      amount: Number(formData.amount),
+      amount: parseAmount(formData.amount),
       type: Number(formData.type),
       date: formData.date,
       categoryId: formData.categoryId,
