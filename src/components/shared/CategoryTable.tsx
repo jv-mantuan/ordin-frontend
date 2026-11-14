@@ -97,12 +97,14 @@ export function CategoryTable({
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button
                   onClick={() => onEdit && onEdit(category)}
+                  aria-label={`Editar ${category.name}`}
                   style={{ background: 'transparent', border: 'none', color: colors.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '6px' }}
                 >
                   <EditIcon />
                 </button>
                 <button
                   onClick={() => onDelete && onDelete(category.id)}
+                  aria-label={`Excluir ${category.name}`}
                   style={{ background: 'transparent', border: 'none', color: colors.expense, cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '6px' }}
                 >
                   <TrashIcon />
@@ -148,12 +150,14 @@ export function CategoryTable({
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                     <button
                       onClick={() => onEdit && onEdit(category)}
+                  aria-label={`Editar ${category.name}`}
                       style={{ background: "transparent", border: "none", color: colors.textSecondary, cursor: "pointer", display: "flex", alignItems: "center" }}
                     >
                       <EditIcon />
                     </button>
                     <button
                       onClick={() => onDelete && onDelete(category.id)}
+                  aria-label={`Excluir ${category.name}`}
                       style={{ background: "transparent", border: "none", color: colors.expense, cursor: "pointer", display: "flex", alignItems: "center" }}
                     >
                       <TrashIcon />

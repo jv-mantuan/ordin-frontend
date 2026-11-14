@@ -136,12 +136,14 @@ export function TransactionTable({ transactions, isLoading, compact, onEdit, onD
               <div style={{ display: 'flex', gap: '8px', borderLeft: `1px solid ${colors.border}`, paddingLeft: '12px', marginLeft: '12px', alignItems: 'center' }}>
                 <button
                   onClick={() => onEdit && onEdit(tx)}
+                  aria-label={`Editar ${tx.name}`}
                   style={{ background: 'transparent', border: 'none', color: colors.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 >
                   <EditIcon />
                 </button>
                 <button
                   onClick={() => onDelete && tx.id && onDelete(tx.id)}
+                  aria-label={`Excluir ${tx.name}`}
                   style={{ background: 'transparent', border: 'none', color: colors.expense, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                 >
                   <TrashIcon />
@@ -228,12 +230,14 @@ export function TransactionTable({ transactions, isLoading, compact, onEdit, onD
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
                     <button
                       onClick={() => onEdit && onEdit(tx)}
+                  aria-label={`Editar ${tx.name}`}
                       style={{ background: 'transparent', border: 'none', color: colors.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       <EditIcon />
                     </button>
                     <button
                       onClick={() => onDelete && tx.id && onDelete(tx.id)}
+                  aria-label={`Excluir ${tx.name}`}
                       style={{ background: 'transparent', border: 'none', color: colors.expense, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
                     >
                       <TrashIcon />
