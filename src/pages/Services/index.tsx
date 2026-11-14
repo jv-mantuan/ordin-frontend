@@ -4,7 +4,7 @@ import { radius } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
-import { StatCard } from '../../components/shared/StatCard'
+import { ServiceSummaryCard } from '../../components/shared/ServiceSummaryCard'
 import { ServiceList } from '../../components/shared/ServiceList'
 import { ServiceFormModal } from '../../components/shared/ServiceFormModal'
 import { LoadMore } from '../../components/shared/LoadMore'
@@ -18,8 +18,6 @@ import {
   useServicesSummary,
   useUpdateService,
 } from '../../hooks/useServices'
-import { SERVICE_METRIC_INFO, type ServiceMetrics } from '../../lib/serviceMetrics'
-import { formatBRL } from '../../lib/money'
 import { todayISO } from '../../lib/date'
 import { useToday } from '../../hooks/useToday'
 import type { ServiceDto, ServiceRequest, ServiceStatus } from '../../types/service'
@@ -31,15 +29,6 @@ const FILTERS: { value: Filter; label: string; empty: string }[] = [
   { value: 'completed', label: 'Concluídos', empty: 'Nenhum serviço concluído ainda.' },
   { value: 'cancelled', label: 'Cancelados', empty: 'Nenhum serviço cancelado.' },
   { value: 'all', label: 'Todos', empty: 'Você ainda não cadastrou serviços.' },
-]
-
-/** Row 1: billing; row 2: costs and what is left. "A receber" is the highlighted card. */
-const CARD_ORDER: { key: keyof ServiceMetrics; accent?: boolean }[] = [
-  { key: 'total' },
-  { key: 'consolidated' },
-  { key: 'receivable', accent: true },
-  { key: 'expenses' },
-  { key: 'netForecast' },
 ]
 
 const errorMessage = (e: unknown, fallback: string) =>
@@ -113,12 +102,6 @@ export function ServicesPage() {
   }
 
   const pagePadding = isMobile ? '16px' : isTablet ? '24px' : '30px'
-  const gridColumns = isMobile ? '1fr' : isTablet ? 'repeat(2, minmax(0, 1fr))' : 'repeat(6, minmax(0, 1fr))'
-  const cardSpan = (i: number) => {
-    if (isMobile) return undefined
-    if (isTablet) return i === CARD_ORDER.length - 1 ? 'span 2' : undefined
-    return i < 3 ? 'span 2' : 'span 3'
-  }
 
   const newButton = (
     <button
@@ -207,23 +190,7 @@ export function ServicesPage() {
             </div>
           )}
 
-          <section
-            aria-label="Resumo dos serviços"
-            style={{ display: 'grid', gridTemplateColumns: gridColumns, gap: isMobile ? '10px' : '14px', marginBottom: '24px' }}
-          >
-            {CARD_ORDER.map(({ key, accent }, i) => (
-              <div key={key} style={{ gridColumn: cardSpan(i), display: 'flex', minWidth: 0 }}>
-                <StatCard
-                  label={SERVICE_METRIC_INFO[key].label}
-                  info={SERVICE_METRIC_INFO[key].info}
-                  value={summary.data ? formatBRL(summary.data[key]) : '—'}
-                  accent={accent}
-                  icon={null}
-                  valueSize={isMobile ? 28 : 30}
-                />
-              </div>
-            ))}
-          </section>
+          <ServiceSummaryCard metrics={summary.data ?? null} />
           {summary.isError && (
             <div role="alert" style={{ color: colors.expense, fontSize: '13px', margin: '-12px 0 20px' }}>
               Não foi possível carregar o resumo. Os valores acima aparecem quando a conexão voltar.
