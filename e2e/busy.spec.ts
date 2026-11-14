@@ -19,6 +19,8 @@ test('a row action shows progress while the API works', async ({ page, request }
   await button.click()
   await expect(button).toHaveText(/Concluindo/)
   await expect(button).toHaveAttribute('aria-busy', 'true')
+  // While it works, the arrow cursor (not the clickable hand).
+  expect(await button.evaluate((el) => getComputedStyle(el).cursor)).toBe('default')
   await expect(page.getByTestId(/^service-/).filter({ hasText: name })).toHaveAttribute('aria-busy', 'true')
   await expect(page.getByText('Serviço concluído!')).toBeVisible()
 })

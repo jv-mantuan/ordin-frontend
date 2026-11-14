@@ -116,7 +116,7 @@ export function CategoriesPage() {
               fontWeight: 600,
               padding: "0 16px",
               minHeight: "44px",
-              cursor: "pointer",
+              cursor: createCategory.isPending ? "default" : "pointer",
               opacity: createCategory.isPending ? 0.7 : 1,
             }}
           >
@@ -272,7 +272,7 @@ export function CategoriesPage() {
                   padding: "8px 14px",
                   minHeight: "44px",
                   flex: isMobile ? 1 : undefined,
-                  cursor: (createCategory.isPending || updateCategory.isPending) ? "not-allowed" : "pointer",
+                  cursor: (createCategory.isPending || updateCategory.isPending) ? "default" : "pointer",
                 }}
               >
                 Cancelar
@@ -290,7 +290,7 @@ export function CategoriesPage() {
                   padding: "8px 14px",
                   minHeight: "44px",
                   flex: isMobile ? 1.5 : undefined,
-                  cursor: (createCategory.isPending || updateCategory.isPending) ? "not-allowed" : "pointer",
+                  cursor: (createCategory.isPending || updateCategory.isPending) ? "default" : "pointer",
                   opacity: (createCategory.isPending || updateCategory.isPending) ? 0.75 : 1,
                 }}
               >

@@ -437,7 +437,7 @@ export function TransactionsPage() {
                   fontSize: '13px',
                   fontWeight: 500,
                   padding: '8px 14px',
-                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'not-allowed' : 'pointer',
+                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'default' : 'pointer',
                   minHeight: '44px',
                   flex: isMobile ? 1 : undefined,
                 }}
@@ -455,7 +455,7 @@ export function TransactionsPage() {
                   fontSize: '13px',
                   fontWeight: 600,
                   padding: '8px 14px',
-                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'not-allowed' : 'pointer',
+                  cursor: (createTransaction.isPending || updateTransaction.isPending) ? 'default' : 'pointer',
                   opacity: (createTransaction.isPending || updateTransaction.isPending) ? 0.75 : 1,
                   minHeight: '44px',
                   flex: isMobile ? 1.5 : undefined,

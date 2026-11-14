@@ -61,7 +61,7 @@ export function LoadMore({ hasNextPage, isFetching, hasError = false, onLoadMore
           color: colors.textSecondary,
           fontSize: '13px',
           fontWeight: 500,
-          cursor: 'pointer',
+          cursor: isFetching ? 'default' : 'pointer',
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',

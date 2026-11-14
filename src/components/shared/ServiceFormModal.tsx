@@ -211,7 +211,7 @@ export function ServiceFormModal({ service, isSaving, onClose, onSubmit }: Servi
               fontSize: '13px',
               fontWeight: 500,
               padding: '8px 16px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
+              cursor: isSaving ? 'default' : 'pointer',
               minHeight: '44px',
               flex: isMobile ? 1 : undefined,
             }}
@@ -232,7 +232,7 @@ export function ServiceFormModal({ service, isSaving, onClose, onSubmit }: Servi
               fontSize: '13px',
               fontWeight: 600,
               padding: '8px 18px',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
+              cursor: isSaving ? 'default' : 'pointer',
               opacity: isSaving ? 0.75 : 1,
               minHeight: '44px',
               flex: isMobile ? 1.5 : undefined,
