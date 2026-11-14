@@ -1,9 +1,19 @@
 import client, { type ApiResponse } from './client'
-import type { TransactionDto, TransactionRequest, TransactionWithCategoryNameDto } from '../types/transaction'
+import type { Page, PageParams } from '../types/page'
+import type {
+  TransactionDto,
+  TransactionFilters,
+  TransactionRequest,
+  TransactionsSummary,
+  TransactionWithCategoryNameDto,
+} from '../types/transaction'
 
 export const transactionsApi = {
-  getAll: () =>
-    client.get<ApiResponse<TransactionWithCategoryNameDto[]>>('/v1/transactions'),
+  getPage: (params: TransactionFilters & PageParams) =>
+    client.get<ApiResponse<Page<TransactionWithCategoryNameDto>>>('/v1/transactions', { params }),
+
+  summary: (params: { from: string; to: string; timeZone: string }) =>
+    client.get<ApiResponse<TransactionsSummary>>('/v1/transactions/summary', { params }),
 
   getById: (id: string) =>
     client.get<ApiResponse<TransactionWithCategoryNameDto>>(`/v1/transactions/${id}`),

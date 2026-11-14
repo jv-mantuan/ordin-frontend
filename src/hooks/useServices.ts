@@ -1,16 +1,26 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { servicesApi } from '../api/services'
-import type { ServiceRequest } from '../types/service'
+import type { ServiceRequest, ServiceStatus } from '../types/service'
 
 const KEY = ['services']
 
-export const useServices = () =>
-  useQuery({
-    queryKey: KEY,
-    queryFn: () => servicesApi.getAll().then((r) => r.data.data),
+/** Cursor-paginated list; the status filter is part of the key, so changing it starts a fresh list. */
+export const useServicesInfinite = (status?: ServiceStatus) =>
+  useInfiniteQuery({
+    queryKey: [...KEY, 'list', { status }],
+    queryFn: ({ pageParam }) => servicesApi.getPage({ status, cursor: pageParam }).then((r) => r.data.data),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => last.nextCursor ?? undefined,
   })
 
-/** Every service mutation refreshes the list, which also refreshes the metric cards. */
+/** Metric cards + today's scheduled count, computed by the API over every service. */
+export const useServicesSummary = (today: string) =>
+  useQuery({
+    queryKey: [...KEY, 'summary', today],
+    queryFn: () => servicesApi.summary(today).then((r) => r.data.data),
+  })
+
+/** Every service mutation refreshes lists and summary (same key prefix). */
 function useServiceMutation<TArgs, TResult>(fn: (args: TArgs) => Promise<TResult>) {
   const queryClient = useQueryClient()
   return useMutation({
@@ -36,5 +46,5 @@ export const useCancelService = () =>
 export const useReopenService = () =>
   useServiceMutation((id: string) => servicesApi.reopen(id).then((r) => r.data.data))
 
-export const useCompleteServicesBatch = () =>
-  useServiceMutation((ids: string[]) => servicesApi.completeBatch(ids).then((r) => r.data.data))
+export const useCompleteServicesByDate = () =>
+  useServiceMutation((date: string) => servicesApi.completeByDate(date).then((r) => r.data.data))

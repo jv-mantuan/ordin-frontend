@@ -1,5 +1,3 @@
-import type { ServiceDto } from '../types/service'
-
 export interface ServiceMetrics {
   total: number
   consolidated: number
@@ -9,8 +7,8 @@ export interface ServiceMetrics {
 }
 
 /**
- * Card labels and tooltip copy. Kept next to computeServiceMetrics so the
- * explanation never drifts from the formula.
+ * Card labels and tooltip copy. The numbers come from GET /v1/services/summary; keep this text in
+ * sync with the formulas in the backend's ServicesService.summary.
  */
 export const SERVICE_METRIC_INFO: Record<keyof ServiceMetrics, { label: string; info: string }> = {
   total: {
@@ -33,30 +31,4 @@ export const SERVICE_METRIC_INFO: Record<keyof ServiceMetrics, { label: string; 
     label: 'Faturamento líquido previsto',
     info: 'O que sobra quando tudo for recebido e todos os gastos forem pagos: faturamento total menos despesas previstas. Pode ficar negativo.',
   },
-}
-
-const cents = (x: number) => Math.round(x * 100) / 100
-
-/** All metrics ignore cancelled services. */
-export function computeServiceMetrics(services: ServiceDto[]): ServiceMetrics {
-  let total = 0
-  let consolidated = 0
-  let receivable = 0
-  let expenses = 0
-
-  for (const s of services) {
-    if (s.status === 'cancelled') continue
-    total += s.amount
-    expenses += s.expenses
-    receivable += Math.max(s.amount - s.receivedAmount, 0)
-    if (s.status === 'completed') consolidated += s.amount
-  }
-
-  return {
-    total: cents(total),
-    consolidated: cents(consolidated),
-    receivable: cents(receivable),
-    expenses: cents(expenses),
-    netForecast: cents(total - expenses),
-  }
 }

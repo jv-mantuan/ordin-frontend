@@ -15,6 +15,16 @@ export interface ServiceDto {
   createdAt: string
 }
 
+export interface ServicesSummary {
+  total: number
+  consolidated: number
+  receivable: number
+  expenses: number
+  netForecast: number
+  /** Scheduled services on the given local date. */
+  todayScheduled: number
+}
+
 export interface ServiceRequest {
   name: string
   clientName: string | null

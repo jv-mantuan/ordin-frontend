@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { toast } from 'react-toastify'
 import { radius } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
@@ -7,16 +7,18 @@ import { TopBar } from '../../components/shared/TopBar'
 import { StatCard } from '../../components/shared/StatCard'
 import { ServiceList } from '../../components/shared/ServiceList'
 import { ServiceFormModal } from '../../components/shared/ServiceFormModal'
+import { LoadMore } from '../../components/shared/LoadMore'
 import {
   useCancelService,
   useCompleteService,
-  useCompleteServicesBatch,
+  useCompleteServicesByDate,
   useCreateService,
   useReopenService,
-  useServices,
+  useServicesInfinite,
+  useServicesSummary,
   useUpdateService,
 } from '../../hooks/useServices'
-import { computeServiceMetrics, SERVICE_METRIC_INFO, type ServiceMetrics } from '../../lib/serviceMetrics'
+import { SERVICE_METRIC_INFO, type ServiceMetrics } from '../../lib/serviceMetrics'
 import { formatBRL } from '../../lib/money'
 import { todayISO } from '../../lib/date'
 import { useToday } from '../../hooks/useToday'
@@ -53,26 +55,22 @@ export function ServicesPage() {
   const [modal, setModal] = useState<{ service: ServiceDto | null } | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
-  const { data: services = [], isLoading, isError } = useServices()
   const createService = useCreateService()
   const updateService = useUpdateService()
   const completeService = useCompleteService()
   const cancelService = useCancelService()
   const reopenService = useReopenService()
-  const completeBatch = useCompleteServicesBatch()
+  const completeByDate = useCompleteServicesByDate()
 
   const today = useToday()
-  const metrics = useMemo(() => computeServiceMetrics(services), [services])
-  const todayIds = useMemo(
-    () => services.filter((s) => s.status === 'scheduled' && s.date === today).map((s) => s.id),
-    [services, today],
-  )
-  const visible = useMemo(() => {
-    if (filter === 'all') return services
-    const list = services.filter((s) => s.status === filter)
-    // Finished work reads newest first; scheduled work reads in the order it will happen.
-    return filter === 'scheduled' ? list : [...list].reverse()
-  }, [services, filter])
+  // Filter and order are applied by the API; switching the filter starts a fresh list (new query key).
+  const list = useServicesInfinite(filter === 'all' ? undefined : filter)
+  const services = useMemo(() => list.data?.pages.flatMap((p) => p.items) ?? [], [list.data])
+  const { fetchNextPage } = list
+  const loadMore = useCallback(() => void fetchNextPage(), [fetchNextPage])
+  // Every number comes from the API over all services, never from the pages loaded so far.
+  const summary = useServicesSummary(today)
+  const todayCount = summary.data?.todayScheduled ?? 0
 
   const runAction = async (s: ServiceDto, fn: (id: string) => Promise<unknown>, success: string, fallback: string) => {
     setBusyId(s.id)
@@ -99,18 +97,16 @@ export function ServicesPage() {
   }
 
   const handleCompleteToday = async () => {
-    // Recomputed at click time: never trust a "today" captured before midnight.
-    const now = todayISO()
-    const ids = services.filter((s) => s.status === 'scheduled' && s.date === now).map((s) => s.id)
-    if (ids.length === 0) {
+    if (todayCount === 0) {
       toast.info('Nenhum serviço agendado para hoje.')
       return
     }
-    if (!confirm(`Concluir ${plural(ids.length, 'serviço', 'serviços')} de hoje?`)) return
+    if (!confirm(`Concluir ${plural(todayCount, 'serviço', 'serviços')} de hoje?`)) return
     try {
-      const done = await completeBatch.mutateAsync(ids)
-      if (done.length === 0) toast.info('Nenhum serviço de hoje estava agendado.')
-      else toast.success(plural(done.length, 'serviço concluído', 'serviços concluídos'))
+      // The date is taken at click time: never trust a "today" captured before midnight.
+      const { completed } = await completeByDate.mutateAsync(todayISO())
+      if (completed === 0) toast.info('Nenhum serviço de hoje estava agendado.')
+      else toast.success(plural(completed, 'serviço concluído', 'serviços concluídos'))
     } catch (e) {
       toast.error(errorMessage(e, 'Não foi possível concluir os serviços de hoje.'))
     }
@@ -152,38 +148,38 @@ export function ServicesPage() {
       type="button"
       className="svc-btn"
       onClick={() => void handleCompleteToday()}
-      disabled={todayIds.length === 0 || completeBatch.isPending}
-      title={todayIds.length === 0 ? 'Nenhum serviço agendado para hoje' : undefined}
+      disabled={todayCount === 0 || completeByDate.isPending}
+      title={todayCount === 0 ? 'Nenhum serviço agendado para hoje' : undefined}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
         background: colors.bgCard,
-        border: `1px solid ${todayIds.length ? colors.accentGreenMuted : colors.border}`,
+        border: `1px solid ${todayCount ? colors.accentGreenMuted : colors.border}`,
         borderRadius: radius.md,
-        color: todayIds.length ? colors.textPrimary : colors.textMuted,
+        color: todayCount ? colors.textPrimary : colors.textMuted,
         fontSize: '13px',
         fontWeight: 500,
         padding: '0 14px',
-        cursor: todayIds.length === 0 ? 'not-allowed' : completeBatch.isPending ? 'wait' : 'pointer',
+        cursor: todayCount === 0 ? 'not-allowed' : completeByDate.isPending ? 'wait' : 'pointer',
         minHeight: '44px',
         whiteSpace: 'nowrap',
         flex: isMobile ? 1 : undefined,
       }}
     >
-      {completeBatch.isPending ? 'Concluindo…' : 'Concluir serviços de hoje'}
+      {completeByDate.isPending ? 'Concluindo…' : 'Concluir serviços de hoje'}
       <span
-        aria-label={`(${todayIds.length})`}
+        aria-label={`(${todayCount})`}
         style={{
           minWidth: '22px', height: '22px', padding: '0 6px', borderRadius: radius.full,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '12px', fontWeight: 600, fontVariantNumeric: 'tabular-nums',
-          background: todayIds.length ? colors.incomeSubtle : colors.bgCardElevated,
-          color: todayIds.length ? colors.accentGreenBright : colors.textMuted,
+          background: todayCount ? colors.incomeSubtle : colors.bgCardElevated,
+          color: todayCount ? colors.accentGreenBright : colors.textMuted,
         }}
       >
-        {todayIds.length}
+        {todayCount}
       </span>
     </button>
   )
@@ -220,7 +216,7 @@ export function ServicesPage() {
                 <StatCard
                   label={SERVICE_METRIC_INFO[key].label}
                   info={SERVICE_METRIC_INFO[key].info}
-                  value={isLoading || isError ? '—' : formatBRL(metrics[key])}
+                  value={summary.data ? formatBRL(summary.data[key]) : '—'}
                   accent={accent}
                   icon={null}
                   valueSize={isMobile ? 28 : 30}
@@ -228,6 +224,11 @@ export function ServicesPage() {
               </div>
             ))}
           </section>
+          {summary.isError && (
+            <div role="alert" style={{ color: colors.expense, fontSize: '13px', margin: '-12px 0 20px' }}>
+              Não foi possível carregar o resumo. Os valores acima aparecem quando a conexão voltar.
+            </div>
+          )}
 
           <div role="group" aria-label="Filtrar serviços" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
             {FILTERS.map((f) => {
@@ -258,15 +259,15 @@ export function ServicesPage() {
             })}
           </div>
 
-          {isError ? (
+          {list.isError ? (
             <div role="alert" style={{ color: colors.expense, fontSize: '14px', padding: '24px 0' }}>
               Não foi possível carregar os serviços. Verifique sua conexão e recarregue a página.
             </div>
           ) : (
             <ServiceList
-              services={visible}
+              services={services}
               today={today}
-              isLoading={isLoading}
+              isLoading={list.isLoading}
               emptyText={FILTERS.find((f) => f.value === filter)!.empty}
               busyId={busyId}
               onEdit={(s) => setModal({ service: s })}
@@ -276,6 +277,13 @@ export function ServicesPage() {
                 if (!confirm(`Cancelar o serviço "${s.name}"?`)) return
                 void runAction(s, cancelService.mutateAsync, 'Serviço cancelado.', 'Não foi possível cancelar o serviço.')
               }}
+            />
+          )}
+          {!list.isError && (
+            <LoadMore
+              hasNextPage={!!list.hasNextPage}
+              isFetching={list.isFetchingNextPage}
+              onLoadMore={loadMore}
             />
           )}
         </div>

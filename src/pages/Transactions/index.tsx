@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { useTransactions, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../hooks/useTransactions'
+import { useCallback, useMemo, useState } from 'react'
+import { useTransactionsInfinite, useCreateTransaction, useUpdateTransaction, useDeleteTransaction } from '../../hooks/useTransactions'
+import { LoadMore } from '../../components/shared/LoadMore'
 import { useCategories } from '../../hooks/useCategories'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
@@ -31,7 +32,12 @@ export function TransactionsPage() {
     date: '',
     categoryId: '',
   })
-  const { data: transactions = [], isLoading } = useTransactions()
+  // The type filter is applied by the API; changing it starts a fresh list (new query key).
+  const list = useTransactionsInfinite(filter === 'all' ? {} : { type: filter })
+  const transactions = useMemo(() => list.data?.pages.flatMap((p) => p.items) ?? [], [list.data])
+  const isLoading = list.isLoading
+  const { fetchNextPage } = list
+  const loadMore = useCallback(() => void fetchNextPage(), [fetchNextPage])
   const { data: categories = [] } = useCategories()
   const createTransaction = useCreateTransaction()
   const updateTransaction = useUpdateTransaction()
@@ -40,9 +46,6 @@ export function TransactionsPage() {
 
 
 
-  const filtered = filter === 'all'
-    ? transactions
-    : transactions.filter((t) => t.type === filter)
 
   const tabs: { label: string; value: Filter }[] = [
     { label: 'Todos', value: 'all' },
@@ -127,7 +130,7 @@ export function TransactionsPage() {
       const payloadDate = new Date(parsed.data.date).getTime()
 
       try {
-        const refreshed = await transactionsApi.getAll().then((response) => response.data.data)
+        const refreshed = await transactionsApi.getPage({ limit: 100 }).then((response) => response.data.data.items)
         const wasCreated = refreshed.some((transaction) => (
           transaction.name === parsed.data.name
           && Number(transaction.amount) === parsed.data.amount
@@ -283,12 +286,13 @@ export function TransactionsPage() {
           overflow: 'hidden',
         }}>
           <TransactionTable
-            transactions={filtered}
+            transactions={transactions}
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
         </div>
+        <LoadMore hasNextPage={!!list.hasNextPage} isFetching={list.isFetchingNextPage} onLoadMore={loadMore} />
         </div>{/* end inner padding wrapper */}
       </main>
 

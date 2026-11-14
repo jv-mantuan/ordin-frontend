@@ -11,6 +11,9 @@ const E2E_API_URL = 'http://localhost:3100'
 // Not 5174: Vite falls back to it when 5173 is busy, and a plain dev server there has no bypass.
 const E2E_WEB_URL = 'http://localhost:5391'
 
+const MOBILE = { ...devices['Desktop Chrome'], viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true }
+const DESKTOP = { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }
+
 export default defineConfig({
   testDir: 'e2e',
   testIgnore: /real-auth[\\/]/,
@@ -24,14 +27,30 @@ export default defineConfig({
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
   },
+  // Every test runs as the same master user. pagination.spec.ts seeds dozens of rows that would push
+  // other tests' rows off the first page, so it runs in its own phase after the others.
   projects: [
     {
       name: 'mobile',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true },
+      testIgnore: /pagination\.spec\.ts/,
+      use: MOBILE,
     },
     {
       name: 'desktop',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      testIgnore: /pagination\.spec\.ts/,
+      use: DESKTOP,
+    },
+    {
+      name: 'mobile-pagination',
+      testMatch: /pagination\.spec\.ts/,
+      dependencies: ['mobile', 'desktop'],
+      use: MOBILE,
+    },
+    {
+      name: 'desktop-pagination',
+      testMatch: /pagination\.spec\.ts/,
+      dependencies: ['mobile', 'desktop'],
+      use: DESKTOP,
     },
   ],
   webServer: [

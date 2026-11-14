@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTransactions } from '../../hooks/useTransactions'
+import { useRecentTransactions, useTransactionsSummary } from '../../hooks/useTransactions'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
 import { StatCard } from '../../components/shared/StatCard'
@@ -20,63 +20,31 @@ export function DashboardPage() {
   const { colors } = useTheme()
   const { isMobile, isTablet } = useBreakpoint()
   const navigate = useNavigate()
-  const { data: transactions = [], isLoading: txLoading } = useTransactions()
 
   const [currentDate, setCurrentDate] = useState(() => new Date())
   const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
   const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
 
-  const { totalIncome, totalExpense, balance, donutSegments, barChartData, currentMonthTransactions } = useMemo(() => {
-    const monthTx = transactions.filter(t => {
-      const d = new Date(t.date)
-      return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear()
-    })
+  // Every number is computed by the API for the whole month (independent of any list page).
+  const summary = useTransactionsSummary(currentDate)
+  const { data: recent = [], isLoading: txLoading } = useRecentTransactions(currentDate, 5)
 
-    const totalIncome = monthTx
-      .filter((t) => t.type === 0)
-      .reduce((s, t) => s + t.amount, 0)
-    const totalExpense = monthTx
-      .filter((t) => t.type === 1)
-      .reduce((s, t) => s + t.amount, 0)
-
-    const expenseByCategory = monthTx
-      .filter((t) => t.type === 1)
-      .reduce<Record<string, number>>((acc, t) => {
-        const key = t.categoryName ?? 'Sem categoria'
-        acc[key] = (acc[key] ?? 0) + t.amount
-        return acc
-      }, {})
-
-    const expensesByDate = monthTx
-      .filter((t) => t.type === 1)
-      .reduce<Record<string, number>>((acc, t) => {
-        const key = new Date(t.date).toISOString().split('T')[0]
-        acc[key] = (acc[key] ?? 0) + t.amount
-        return acc
-      }, {})
-
-    const barChartData: ExpenseByMonth[] = Object.entries(expensesByDate)
-      .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-      .map(([day, value]) => ({ day, value }))
-
-    const donutSegments: DonutSegment[] = Object.entries(expenseByCategory)
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, value], i) => ({
-        label,
-        value,
-        color: SEGMENT_COLORS[i % SEGMENT_COLORS.length],
-      }))
-
-    return { totalIncome, totalExpense, balance: totalIncome - totalExpense, donutSegments, barChartData, currentMonthTransactions: monthTx }
-  }, [transactions, currentDate])
-
-  const recent = [...currentMonthTransactions]
-    .sort((a, b) => {
-      const aTimestamp = new Date(a.createdAt ?? a.date).getTime()
-      const bTimestamp = new Date(b.createdAt ?? b.date).getTime()
-      return bTimestamp - aTimestamp
-    })
-    .slice(0, 5)
+  const { totalIncome, totalExpense, balance, donutSegments, barChartData } = useMemo(() => {
+    const s = summary.data
+    const barChartData: ExpenseByMonth[] = (s?.expenseByDay ?? []).map(({ day, total }) => ({ day, value: total }))
+    const donutSegments: DonutSegment[] = (s?.expenseByCategory ?? []).map(({ categoryName, total }, i) => ({
+      label: categoryName,
+      value: total,
+      color: SEGMENT_COLORS[i % SEGMENT_COLORS.length],
+    }))
+    return {
+      totalIncome: s?.income ?? 0,
+      totalExpense: s?.expense ?? 0,
+      balance: s?.balance ?? 0,
+      donutSegments,
+      barChartData,
+    }
+  }, [summary.data])
 
   const pagePadding = isMobile ? '16px' : isTablet ? '24px' : '30px'
   const isSmall = isMobile || isTablet

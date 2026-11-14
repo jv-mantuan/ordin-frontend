@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures'
 
 test('dashboard loads its data from the API', async ({ page }) => {
-  const transactions = page.waitForResponse((r) => r.url().endsWith('/v1/transactions') && r.request().method() === 'GET')
+  const transactions = page.waitForResponse((r) => r.url().includes('/v1/transactions/summary?') && r.request().method() === 'GET')
   await page.goto('/')
 
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()

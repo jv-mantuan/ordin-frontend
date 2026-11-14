@@ -214,14 +214,12 @@ test.describe('review fixes', () => {
     expect(action!.height).toBeGreaterThanOrEqual(44)
   })
 
-  test('metric cards show a dash, not zero, when the list fails to load', async ({ page }) => {
-    await page.route('**/v1/services', (route) =>
-      route.request().method() === 'GET'
-        ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'falhou' }) })
-        : route.fallback(),
+  test('metric cards show a dash, not zero, when the summary fails to load', async ({ page }) => {
+    await page.route('**/v1/services/summary?**', (route) =>
+      route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'falhou' }) }),
     )
     await page.goto('/servicos')
-    await expect(page.getByText('Não foi possível carregar os serviços', { exact: false })).toBeVisible()
+    await expect(page.getByText('Não foi possível carregar o resumo', { exact: false })).toBeVisible()
     const summary = page.getByRole('region', { name: 'Resumo dos serviços' })
     await expect(summary.getByText('R$ 0,00')).toHaveCount(0)
   })
