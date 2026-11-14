@@ -83,3 +83,61 @@ test('metric cards come from the summary, not from the loaded page (Review Focus
   const summary = page.getByRole('region', { name: 'Resumo dos serviços' })
   await expect(summary.getByText(/12\.345,67/).first()).toBeVisible()
 })
+
+test.describe('review fixes', () => {
+  test('a failed next page keeps the loaded rows and does not retry in a loop', async ({ page, request }, testInfo) => {
+    const prefix = uniqueName(testInfo, 'Falha')
+    await seed(
+      request,
+      '/v1/services',
+      Array.from({ length: COUNT }, (_, i) => ({ name: `${prefix} ${i}`, date: '2019-06-01', amount: 1, receivedAmount: 0, expenses: 0 })),
+    )
+    let nextPageCalls = 0
+    await page.route('**/v1/services?**', (route) => {
+      if (!new URL(route.request().url()).searchParams.has('cursor')) return route.fallback()
+      nextPageCalls++
+      return route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ message: 'Muitas requisições em sequência. Tente novamente em alguns segundos.' }) })
+    })
+
+    await page.goto('/servicos')
+    const loadMore = page.getByRole('button', { name: 'Carregar mais' })
+    await loadMore.scrollIntoViewIfNeeded()
+    await expect.poll(() => nextPageCalls).toBeGreaterThan(0)
+    await page.waitForTimeout(3000)
+
+    expect(nextPageCalls).toBeLessThanOrEqual(2) // the first try plus React Query's single retry
+    await expect(page.getByText('Não foi possível carregar os serviços', { exact: false })).toHaveCount(0)
+    // Rows loaded before the failure stay on screen (other runs' rows may fill page 1, so any row counts).
+    await expect(page.getByTestId(/^service-/).first()).toBeVisible()
+    await expect(loadMore).toBeEnabled()
+  })
+
+  test('a lost create response finds the saved transaction even behind 100 newer ones', async ({ page, request }, testInfo) => {
+    const prefix = uniqueName(testInfo, 'Perdida')
+    const res = await request.post(`${E2E_API_URL}/v1/categories`, { headers: AUTH, data: { name: prefix } })
+    const category = (await res.json()).data
+    await seed(
+      request,
+      '/v1/transactions',
+      Array.from({ length: 101 }, (_, i) => ({ name: `${prefix} nova ${i}`, amount: 1, type: 1, date: '2036-01-01T12:00:00Z', categoryId: category.id })),
+    )
+    // The API saves it, but the browser never sees the response.
+    await page.route('**/v1/transactions', async (route) => {
+      if (route.request().method() !== 'POST') return route.fallback()
+      await route.fetch()
+      await route.abort('connectionreset')
+    })
+
+    await page.goto('/transacoes')
+    await page.getByRole('button', { name: '+ Nova transação' }).click()
+    await page.getByLabel('Descrição').fill(`${prefix} antiga`)
+    await page.getByLabel('Valor').fill('10')
+    await page.getByLabel('Tipo').selectOption({ label: 'Despesa' })
+    await page.getByLabel('Data').fill('2001-01-01')
+    await page.getByLabel('Categoria').selectOption({ label: category.name })
+    await page.getByRole('button', { name: 'Salvar' }).click()
+
+    // Recovered: the modal closes instead of showing an error that invites a duplicate submit.
+    await expect(page.getByText('Nova transação', { exact: true })).toHaveCount(0)
+  })
+})

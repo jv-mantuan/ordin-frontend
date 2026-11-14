@@ -5,6 +5,8 @@ import { useTheme } from '../../context/ThemeContext'
 interface LoadMoreProps {
   hasNextPage: boolean
   isFetching: boolean
+  /** The last next-page fetch failed: stop auto-loading (no retry loop) and offer a manual retry. */
+  hasError?: boolean
   onLoadMore: () => void
 }
 
@@ -12,13 +14,13 @@ interface LoadMoreProps {
  * End-of-list row for infinite scroll: fetches the next page when it scrolls into view, and keeps a
  * real button for keyboard users and browsers without IntersectionObserver. Renders nothing at the end.
  */
-export function LoadMore({ hasNextPage, isFetching, onLoadMore }: LoadMoreProps) {
+export function LoadMore({ hasNextPage, isFetching, hasError = false, onLoadMore }: LoadMoreProps) {
   const { colors } = useTheme()
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = ref.current
-    if (!el || !hasNextPage || isFetching || typeof IntersectionObserver === 'undefined') return
+    if (!el || !hasNextPage || isFetching || hasError || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) onLoadMore()
@@ -27,12 +29,20 @@ export function LoadMore({ hasNextPage, isFetching, onLoadMore }: LoadMoreProps)
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [hasNextPage, isFetching, onLoadMore])
+  }, [hasNextPage, isFetching, hasError, onLoadMore])
 
   if (!hasNextPage) return null
 
   return (
-    <div ref={ref} style={{ display: 'flex', justifyContent: 'center', padding: '16px 0 8px' }}>
+    <div
+      ref={ref}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', padding: '16px 0 8px' }}
+    >
+      {hasError && !isFetching && (
+        <span role="alert" style={{ fontSize: '13px', color: colors.expense }}>
+          Não foi possível carregar mais itens.
+        </span>
+      )}
       <button
         type="button"
         className="load-more-btn"
@@ -53,7 +63,7 @@ export function LoadMore({ hasNextPage, isFetching, onLoadMore }: LoadMoreProps)
           cursor: isFetching ? 'wait' : 'pointer',
         }}
       >
-        {isFetching ? 'Carregando…' : 'Carregar mais'}
+        {isFetching ? 'Carregando…' : hasError ? 'Tentar de novo' : 'Carregar mais'}
       </button>
       <style>{`
         .load-more-btn { transition: opacity 0.15s ease, transform 0.1s ease; }

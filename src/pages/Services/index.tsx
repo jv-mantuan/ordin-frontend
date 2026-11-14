@@ -259,7 +259,7 @@ export function ServicesPage() {
             })}
           </div>
 
-          {list.isError ? (
+          {list.isError && !list.data ? (
             <div role="alert" style={{ color: colors.expense, fontSize: '14px', padding: '24px 0' }}>
               Não foi possível carregar os serviços. Verifique sua conexão e recarregue a página.
             </div>
@@ -279,10 +279,11 @@ export function ServicesPage() {
               }}
             />
           )}
-          {!list.isError && (
+          {list.data && (
             <LoadMore
               hasNextPage={!!list.hasNextPage}
               isFetching={list.isFetchingNextPage}
+              hasError={list.isFetchNextPageError}
               onLoadMore={loadMore}
             />
           )}

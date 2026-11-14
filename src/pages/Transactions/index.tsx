@@ -128,9 +128,12 @@ export function TransactionsPage() {
       closeCreateModal()
     } catch (error) {
       const payloadDate = new Date(parsed.data.date).getTime()
+      // Look exactly at the saved instant, not at the latest page: a backdated entry may sit behind
+      // hundreds of newer ones.
+      const window = { from: new Date(payloadDate).toISOString(), to: new Date(payloadDate + 1).toISOString() }
 
       try {
-        const refreshed = await transactionsApi.getPage({ limit: 100 }).then((response) => response.data.data.items)
+        const refreshed = await transactionsApi.getPage({ ...window, limit: 100 }).then((response) => response.data.data.items)
         const wasCreated = refreshed.some((transaction) => (
           transaction.name === parsed.data.name
           && Number(transaction.amount) === parsed.data.amount
@@ -292,7 +295,12 @@ export function TransactionsPage() {
             onDelete={handleDelete}
           />
         </div>
-        <LoadMore hasNextPage={!!list.hasNextPage} isFetching={list.isFetchingNextPage} onLoadMore={loadMore} />
+        <LoadMore
+          hasNextPage={!!list.hasNextPage}
+          isFetching={list.isFetchingNextPage}
+          hasError={list.isFetchNextPageError}
+          onLoadMore={loadMore}
+        />
         </div>{/* end inner padding wrapper */}
       </main>
 
