@@ -8,6 +8,8 @@ import { ServiceSummaryCard } from '../../components/shared/ServiceSummaryCard'
 import { ServiceList } from '../../components/shared/ServiceList'
 import { ServiceFormModal } from '../../components/shared/ServiceFormModal'
 import { LoadMore } from '../../components/shared/LoadMore'
+import { PeriodFilter } from '../../components/shared/PeriodFilter'
+import { periodRange, type DateRange, type Period } from '../../lib/period'
 import {
   useCancelService,
   useCompleteService,
@@ -41,6 +43,16 @@ export function ServicesPage() {
   const { isMobile, isTablet } = useBreakpoint()
   const isDesktop = !isMobile && !isTablet
   const [filter, setFilter] = useState<Filter>('scheduled')
+  const [period, setPeriod] = useState<Period>({ preset: 'all', from: '', to: '' })
+  // The range sent to the API. A reversed custom range is shown as an error and not applied,
+  // so the list and the metrics keep the last valid period.
+  const [range, setRange] = useState<DateRange>({})
+  const periodInvalid = periodRange(period) === null
+  const changePeriod = (next: Period) => {
+    setPeriod(next)
+    const nextRange = periodRange(next)
+    if (nextRange) setRange(nextRange)
+  }
   const [modal, setModal] = useState<{ service: ServiceDto | null } | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
 
@@ -53,12 +65,12 @@ export function ServicesPage() {
 
   const today = useToday()
   // Filter and order are applied by the API; switching the filter starts a fresh list (new query key).
-  const list = useServicesInfinite(filter === 'all' ? undefined : filter)
+  const list = useServicesInfinite(filter === 'all' ? undefined : filter, range)
   const services = useMemo(() => list.data?.pages.flatMap((p) => p.items) ?? [], [list.data])
   const { fetchNextPage } = list
   const loadMore = useCallback(() => void fetchNextPage(), [fetchNextPage])
   // Every number comes from the API over all services, never from the pages loaded so far.
-  const summary = useServicesSummary(today)
+  const summary = useServicesSummary(today, range)
   const todayCount = summary.data?.todayScheduled ?? 0
 
   const runAction = async (s: ServiceDto, fn: (id: string) => Promise<unknown>, success: string, fallback: string) => {
@@ -197,33 +209,45 @@ export function ServicesPage() {
             </div>
           )}
 
-          <div role="group" aria-label="Filtrar serviços" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
-            {FILTERS.map((f) => {
-              const active = filter === f.value
-              return (
-                <button
-                  key={f.value}
-                  type="button"
-                  className="svc-btn"
-                  aria-pressed={active}
-                  onClick={() => setFilter(f.value)}
-                  style={{
-                    background: active ? colors.bgActive : colors.bgCard,
-                    border: `1px solid ${active ? colors.accentGreenMuted : colors.border}`,
-                    borderRadius: radius.full,
-                    color: active ? colors.textPrimary : colors.textSecondary,
-                    fontSize: '13px',
-                    fontWeight: active ? 500 : 400,
-                    padding: '0 16px',
-                    cursor: 'pointer',
-                    minHeight: isDesktop ? '36px' : '44px',
-                    transition: 'background 0.15s, color 0.15s',
-                  }}
-                >
-                  {f.label}
-                </button>
-              )
-            })}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'column-reverse' : 'row',
+              justifyContent: 'space-between',
+              alignItems: isMobile ? 'stretch' : 'flex-end',
+              gap: '12px',
+              marginBottom: '14px',
+            }}
+          >
+            <div role="group" aria-label="Filtrar serviços" style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {FILTERS.map((f) => {
+                const active = filter === f.value
+                return (
+                  <button
+                    key={f.value}
+                    type="button"
+                    className="svc-btn"
+                    aria-pressed={active}
+                    onClick={() => setFilter(f.value)}
+                    style={{
+                      background: active ? colors.bgActive : colors.bgCard,
+                      border: `1px solid ${active ? colors.accentGreenMuted : colors.border}`,
+                      borderRadius: radius.full,
+                      color: active ? colors.textPrimary : colors.textSecondary,
+                      fontSize: '13px',
+                      fontWeight: active ? 500 : 400,
+                      padding: '0 16px',
+                      cursor: 'pointer',
+                      minHeight: isDesktop ? '36px' : '44px',
+                      transition: 'background 0.15s, color 0.15s',
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                )
+              })}
+            </div>
+            <PeriodFilter value={period} onChange={changePeriod} invalid={periodInvalid} />
           </div>
 
           {list.isError && !list.data ? (
@@ -235,7 +259,7 @@ export function ServicesPage() {
               services={services}
               today={today}
               isLoading={list.isLoading}
-              emptyText={FILTERS.find((f) => f.value === filter)!.empty}
+              emptyText={range.from || range.to ? 'Nenhum serviço neste período.' : FILTERS.find((f) => f.value === filter)!.empty}
               busyId={busyId}
               onEdit={(s) => setModal({ service: s })}
               onComplete={(s) => void runAction(s, completeService.mutateAsync, 'Serviço concluído!', 'Não foi possível concluir o serviço.')}

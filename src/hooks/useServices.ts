@@ -1,23 +1,25 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { servicesApi } from '../api/services'
+import type { DateRange } from '../lib/period'
 import type { ServiceRequest, ServiceStatus } from '../types/service'
 
 const KEY = ['services']
 
-/** Cursor-paginated list; the status filter is part of the key, so changing it starts a fresh list. */
-export const useServicesInfinite = (status?: ServiceStatus) =>
+/** Cursor-paginated list; the filters are part of the key, so changing them starts a fresh list. */
+export const useServicesInfinite = (status?: ServiceStatus, range: DateRange = {}) =>
   useInfiniteQuery({
-    queryKey: [...KEY, 'list', { status }],
-    queryFn: ({ pageParam }) => servicesApi.getPage({ status, cursor: pageParam }).then((r) => r.data.data),
+    queryKey: [...KEY, 'list', { status, ...range }],
+    queryFn: ({ pageParam }) =>
+      servicesApi.getPage({ status, ...range, cursor: pageParam }).then((r) => r.data.data),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   })
 
-/** Metric cards + today's scheduled count, computed by the API over every service. */
-export const useServicesSummary = (today: string) =>
+/** Metric cards for the period (all services when empty) + today's scheduled count, computed by the API. */
+export const useServicesSummary = (today: string, range: DateRange = {}) =>
   useQuery({
-    queryKey: [...KEY, 'summary', today],
-    queryFn: () => servicesApi.summary(today).then((r) => r.data.data),
+    queryKey: [...KEY, 'summary', today, range],
+    queryFn: () => servicesApi.summary(today, range).then((r) => r.data.data),
   })
 
 /** Every service mutation refreshes lists and summary (same key prefix). */

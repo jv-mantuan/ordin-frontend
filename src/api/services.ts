@@ -1,12 +1,14 @@
 import client, { type ApiResponse } from './client'
 import type { Page, PageParams } from '../types/page'
+import type { DateRange } from '../lib/period'
 import type { ServiceDto, ServiceRequest, ServicesSummary, ServiceStatus } from '../types/service'
 
 export const servicesApi = {
-  getPage: (params: { status?: ServiceStatus } & PageParams) =>
+  getPage: (params: { status?: ServiceStatus } & DateRange & PageParams) =>
     client.get<ApiResponse<Page<ServiceDto>>>('/v1/services', { params }),
 
-  summary: (today: string) => client.get<ApiResponse<ServicesSummary>>('/v1/services/summary', { params: { today } }),
+  summary: (today: string, range: DateRange = {}) =>
+    client.get<ApiResponse<ServicesSummary>>('/v1/services/summary', { params: { today, ...range } }),
 
   getById: (id: string) => client.get<ApiResponse<ServiceDto>>(`/v1/services/${id}`),
 
