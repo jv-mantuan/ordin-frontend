@@ -48,90 +48,95 @@ export function TopBar({ title, children }: TopBarProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, flexShrink: 0 }}>
 
 
-        {/* Theme toggle */}
-        <button
-          onClick={toggleTheme}
-          title={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.md,
-            width: isMobile ? '34px' : '32px',
-            height: isMobile ? '34px' : '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: colors.textSecondary,
-            transition: 'background 0.2s, color 0.2s',
-            flexShrink: 0,
-          }}
-        >
-          {isDark ? <SunIcon /> : <MoonIcon />}
-        </button>
+        {/* On tablet/desktop the Sidebar footer has the theme toggle, the user and "Sair". */}
+        {isMobile && (
+          <>
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+              style={{
+                background: colors.bgCard,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                width: isMobile ? '34px' : '32px',
+                height: isMobile ? '34px' : '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: colors.textSecondary,
+                transition: 'background 0.2s, color 0.2s',
+                flexShrink: 0,
+              }}
+            >
+              {isDark ? <SunIcon /> : <MoonIcon />}
+            </button>
 
-        {/* Avatar + name: link to the profile page */}
-        <Link
-          to="/perfil"
-          title="Perfil"
-          aria-label="Perfil"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: spacing.sm,
-            textDecoration: 'none',
-            borderRadius: radius.md,
-            minWidth: 0,
-          }}
-        >
-        <div style={{
-          width: isMobile ? '34px' : '30px',
-          height: isMobile ? '34px' : '30px',
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '11px',
-          fontWeight: 600,
-          color: colors.white,
-          flexShrink: 0,
-        }}>{initials(user)}</div>
+            {/* Avatar + name: link to the profile page */}
+            <Link
+              to="/perfil"
+              title="Perfil"
+              aria-label="Perfil"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                textDecoration: 'none',
+                borderRadius: radius.md,
+                minWidth: 0,
+              }}
+            >
+            <div style={{
+              width: isMobile ? '34px' : '30px',
+              height: isMobile ? '34px' : '30px',
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: colors.white,
+              flexShrink: 0,
+            }}>{initials(user)}</div>
 
-        {!isMobile && (
-          <span style={{
-            fontSize: '13px',
-            color: colors.textPrimary,
-            fontWeight: 500,
-            maxWidth: '180px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}>{displayName(user)}</span>
+            {!isMobile && (
+              <span style={{
+                fontSize: '13px',
+                color: colors.textPrimary,
+                fontWeight: 500,
+                maxWidth: '180px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>{displayName(user)}</span>
+            )}
+            </Link>
+
+            {/* Logout */}
+            <button
+              onClick={handleSignOut}
+              title="Sair"
+              aria-label="Sair"
+              style={{
+                background: colors.bgCard,
+                border: `1px solid ${colors.border}`,
+                borderRadius: radius.md,
+                width: isMobile ? '34px' : '32px',
+                height: isMobile ? '34px' : '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: colors.textSecondary,
+                flexShrink: 0,
+              }}
+            >
+              <LogoutIcon />
+            </button>
+          </>
         )}
-        </Link>
-
-        {/* Logout */}
-        <button
-          onClick={handleSignOut}
-          title="Sair"
-          aria-label="Sair"
-          style={{
-            background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
-            borderRadius: radius.md,
-            width: isMobile ? '34px' : '32px',
-            height: isMobile ? '34px' : '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: colors.textSecondary,
-            flexShrink: 0,
-          }}
-        >
-          <LogoutIcon />
-        </button>
 
         {/* Page-level action slot (e.g. "+ Nova transação") */}
         {children}
@@ -157,7 +162,7 @@ function IconBtn({ children, colors }: { children: React.ReactNode; colors: Retu
 }
 */
 
-function SunIcon() {
+export function SunIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <circle cx="7" cy="7" r="2.5" stroke="currentColor" strokeWidth="1.3" />
@@ -166,7 +171,7 @@ function SunIcon() {
   )
 }
 
-function MoonIcon() {
+export function MoonIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
       <path d="M11.5 9A5 5 0 015 2.5a.5.5 0 00-.6.6A5 5 0 1011 10a.5.5 0 00.5-.6z" fill="currentColor" />

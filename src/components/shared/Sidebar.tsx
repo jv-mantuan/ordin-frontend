@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { useAuth } from '../../context/AuthContext'
 import { displayName, initials } from '../../lib/user'
+import { MoonIcon, SunIcon } from './TopBar'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: <GridIcon /> },
@@ -13,7 +14,7 @@ const NAV_ITEMS = [
 ]
 
 export function Sidebar() {
-  const { colors } = useTheme()
+  const { colors, isDark, toggleTheme } = useTheme()
   const { isMobile } = useBreakpoint()
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
@@ -122,9 +123,29 @@ export function Sidebar() {
           </div>
         </Link>
         <button
+          onClick={toggleTheme}
+          title={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+          aria-label={isDark ? 'Ativar tema claro' : 'Ativar tema escuro'}
+          className="sidebar-icon-btn"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            color: colors.textMuted,
+            padding: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: radius.sm,
+            flexShrink: 0,
+          }}
+        >
+          {isDark ? <SunIcon /> : <MoonIcon />}
+        </button>
+        <button
           onClick={handleSignOut}
           title="Sair"
           aria-label="Sair"
+          className="sidebar-icon-btn"
           style={{
             background: 'transparent',
             border: 'none',
@@ -139,6 +160,11 @@ export function Sidebar() {
         >
           <LogoutIcon />
         </button>
+        <style>{`
+          .sidebar-icon-btn { transition: color 0.15s ease, background 0.15s ease; }
+          .sidebar-icon-btn:hover { color: ${colors.textPrimary}; background: ${colors.bgCardElevated}; }
+          .sidebar-icon-btn:focus-visible { outline: 2px solid ${colors.accentGreenBright}; outline-offset: 1px; }
+        `}</style>
       </div>
     </aside>
   )
