@@ -72,7 +72,7 @@ function ServiceCard({ s, today, ...actions }: RowProps) {
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontSize: '15px', fontWeight: 600, color: colors.textPrimary, overflowWrap: 'anywhere' }}>{s.name}</div>
+          <div style={{ fontSize: '15px', fontWeight: 600, color: colors.textPrimary, overflowWrap: 'break-word' }}>{s.name}</div>
           {s.clientName && <Detail label="Cliente" colors={colors}>{s.clientName}</Detail>}
         </div>
         <StatusBadge status={s.status} />
@@ -157,8 +157,8 @@ function ServiceRow({ s, today, ...actions }: RowProps) {
 
   return (
     <tr data-testid={`service-${s.id}`} className="svc-row" style={{ opacity: s.status === 'cancelled' ? 0.68 : 1 }}>
-      <td style={{ ...td, maxWidth: '280px' }}>
-        <div style={{ fontWeight: 600, overflowWrap: 'anywhere' }}>{s.name}</div>
+      <td style={{ ...td, minWidth: '180px', maxWidth: '280px' }}>
+        <div style={{ fontWeight: 600, overflowWrap: 'break-word' }}>{s.name}</div>
         {s.clientName && <Detail label="Cliente" colors={colors}>{s.clientName}</Detail>}
         {s.notes && <Notes text={s.notes} colors={colors} />}
       </td>
@@ -187,7 +187,7 @@ function ServiceRow({ s, today, ...actions }: RowProps) {
 /** A labelled secondary line under the service name ("Cliente: May"), so each line says what it is. */
 function Detail({ label, children, colors }: { label: string; children: React.ReactNode; colors: ThemeColors }) {
   return (
-    <div style={{ fontSize: '13px', lineHeight: 1.5, color: colors.textPrimary, marginTop: '4px', overflowWrap: 'anywhere' }}>
+    <div style={{ fontSize: '13px', lineHeight: 1.5, color: colors.textPrimary, marginTop: '4px', overflowWrap: 'break-word' }}>
       <span style={{ color: colors.textSecondary }}>{label}: </span>
       {children}
     </div>
@@ -201,7 +201,7 @@ function Notes({ text, colors }: { text: string; colors: ThemeColors }) {
       style={{
         fontSize: '13px', lineHeight: 1.5, color: colors.textPrimary, marginTop: '4px',
         display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-        whiteSpace: 'pre-line', overflowWrap: 'anywhere',
+        whiteSpace: 'pre-line', overflowWrap: 'break-word',
       }}
     >
       <span style={{ color: colors.textSecondary }}>Anotações: </span>
