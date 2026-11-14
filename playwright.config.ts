@@ -33,13 +33,13 @@ export default defineConfig({
     {
       name: 'mobile',
       // A project-level testIgnore replaces the top-level one, so real-auth is repeated here.
-      testIgnore: [/real-auth[\/]/, /pagination\.spec\.ts/],
+      testIgnore: [/real-auth[\\/]/, /pagination\.spec\.ts/],
       use: MOBILE,
     },
     {
       name: 'desktop',
       // A project-level testIgnore replaces the top-level one, so real-auth is repeated here.
-      testIgnore: [/real-auth[\/]/, /pagination\.spec\.ts/],
+      testIgnore: [/real-auth[\\/]/, /pagination\.spec\.ts/],
       use: DESKTOP,
     },
     {
