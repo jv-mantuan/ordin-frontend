@@ -12,7 +12,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 function AuthSplash() {
-  const { colors } = useTheme()
+  const { colors, isDark } = useTheme()
   return (
     <div
       style={{
@@ -27,7 +27,7 @@ function AuthSplash() {
       <img
         src="/brand_assets/ordin-mark.png"
         alt="Carregando"
-        style={{ width: '52px', height: '52px', mixBlendMode: 'screen', opacity: 0.9, animation: 'authpulse 1.2s ease-in-out infinite' }}
+        style={{ width: '52px', height: '52px', mixBlendMode: isDark ? 'screen' : 'normal', opacity: 0.9, animation: 'authpulse 1.2s ease-in-out infinite' }}
       />
       <style>{`@keyframes authpulse { 0%,100% { opacity: 0.35; } 50% { opacity: 1; } }`}</style>
     </div>

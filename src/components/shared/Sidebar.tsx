@@ -128,7 +128,7 @@ export function Sidebar() {
         <img
           src="/brand_assets/ordin-mark.png"
           alt=""
-          style={{ width: collapsed ? '36px' : '44px', height: collapsed ? '36px' : '44px', mixBlendMode: 'screen' }}
+          style={{ width: collapsed ? '36px' : '44px', height: collapsed ? '36px' : '44px', mixBlendMode: isDark ? 'screen' : 'normal' }}
         />
         {!collapsed && (
           <span

@@ -22,6 +22,10 @@ export interface ThemeColors {
   chartBar2: string
   chartBar3: string
   white: string
+  /** Primary action buttons (+ Novo…, Salvar, Concluir). Contrast ≥ 4.5:1 in both themes. */
+  primaryButtonBg: string
+  primaryButtonText: string
+  primaryButtonBorder: string
 }
 
 export const darkColors: ThemeColors = {
@@ -46,6 +50,9 @@ export const darkColors: ThemeColors = {
   chartBar2: '#2d5c3e',
   chartBar3: '#4a8f64',
   white: '#ffffff',
+  primaryButtonBg: '#2a5438',
+  primaryButtonText: '#a8dcb5', // 5.6:1 on the bg
+  primaryButtonBorder: 'rgba(90, 171, 114, 0.25)',
 }
 
 export const lightColors: ThemeColors = {
@@ -70,6 +77,9 @@ export const lightColors: ThemeColors = {
   chartBar2: '#5aab72',
   chartBar3: '#2a5438',
   white: '#ffffff',
+  primaryButtonBg: '#2e7d48',
+  primaryButtonText: '#ffffff', // 5.1:1 on the bg
+  primaryButtonBorder: '#2e7d48',
 }
 
 interface ThemeContextValue {

@@ -79,10 +79,10 @@ export function DashboardPage() {
             <button
               onClick={() => navigate('/transacoes')}
               style={{
-                background: colors.accentGreenMuted,
-                border: `1px solid rgba(90,171,114,0.25)`,
+                background: colors.primaryButtonBg,
+                border: `1px solid ${colors.primaryButtonBorder}`,
                 borderRadius: radius.md,
-                color: colors.income,
+                color: colors.primaryButtonText,
                 fontSize: '12px',
                 fontWeight: 500,
                 padding: '6px 14px',
@@ -102,10 +102,10 @@ export function DashboardPage() {
             onClick={() => navigate('/transacoes')}
             style={{
               width: '100%',
-              background: colors.accentGreenMuted,
-              border: `1px solid rgba(90,171,114,0.25)`,
+              background: colors.primaryButtonBg,
+              border: `1px solid ${colors.primaryButtonBorder}`,
               borderRadius: radius.md,
-              color: colors.income,
+              color: colors.primaryButtonText,
               fontSize: '13px',
               fontWeight: 600,
               padding: '12px 16px',

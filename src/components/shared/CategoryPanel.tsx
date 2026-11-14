@@ -85,10 +85,10 @@ export function CategoryPanel({ categories, isLoading, onNew, onEdit, onDelete, 
             <button
               onClick={onNew}
               style={{
-                background: colors.accentGreenMuted,
+                background: colors.primaryButtonBg,
                 border: `1px solid rgba(90,171,114,0.2)`,
                 borderRadius: radius.full,
-                color: colors.income,
+                color: colors.primaryButtonText,
                 fontSize: '10px',
                 fontWeight: 500,
                 padding: '3px 8px',

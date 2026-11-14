@@ -292,9 +292,9 @@ function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busy: busyRow, 
   }
   const primary: React.CSSProperties = {
     ...base,
-    background: colors.accentGreenMuted,
-    border: '1px solid rgba(90,171,114,0.25)',
-    color: colors.income,
+    background: colors.primaryButtonBg,
+    border: `1px solid ${colors.primaryButtonBorder}`,
+    color: colors.primaryButtonText,
     fontWeight: 600,
   }
 

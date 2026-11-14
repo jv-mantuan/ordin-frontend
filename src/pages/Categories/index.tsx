@@ -108,10 +108,10 @@ export function CategoriesPage() {
             onClick={openCreateModal}
             disabled={createCategory.isPending}
             style={{
-              background: colors.accentGreenMuted,
-              border: `1px solid rgba(90,171,114,0.25)`,
+              background: colors.primaryButtonBg,
+              border: `1px solid ${colors.primaryButtonBorder}`,
               borderRadius: radius.md,
-              color: colors.income,
+              color: colors.primaryButtonText,
               fontSize: "12px",
               fontWeight: 500,
               padding: "6px 14px",
@@ -280,10 +280,10 @@ export function CategoriesPage() {
                 onClick={() => void handleSaveCategory()}
                 disabled={createCategory.isPending || updateCategory.isPending}
                 style={{
-                  background: colors.accentGreenMuted,
-                  border: `1px solid rgba(90,171,114,0.25)`,
+                  background: colors.primaryButtonBg,
+                  border: `1px solid ${colors.primaryButtonBorder}`,
                   borderRadius: radius.md,
-                  color: colors.income,
+                  color: colors.primaryButtonText,
                   fontSize: "12px",
                   fontWeight: 600,
                   padding: "8px 14px",
