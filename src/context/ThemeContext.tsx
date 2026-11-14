@@ -33,6 +33,9 @@ export interface ThemeColors {
   /** Dimmed backdrop behind dialogs, and the dialog panel itself (more opaque than a card). */
   scrim: string
   dialogBg: string
+  /** Edge and depth of cards: a light rim and a top highlight make the glass visible. */
+  cardBorder: string
+  cardShadow: string
 }
 
 export const darkColors: ThemeColors = {
@@ -64,6 +67,8 @@ export const darkColors: ThemeColors = {
   glassBlur: 'none',
   scrim: 'rgba(10, 20, 16, 0.72)',
   dialogBg: '#142019',
+  cardBorder: 'rgba(255, 255, 255, 0.07)',
+  cardShadow: 'none',
 }
 
 export const lightColors: ThemeColors = {
@@ -95,6 +100,8 @@ export const lightColors: ThemeColors = {
   glassBlur: 'none',
   scrim: 'rgba(15, 26, 20, 0.35)',
   dialogBg: '#f7faf8',
+  cardBorder: 'rgba(0, 0, 0, 0.08)',
+  cardShadow: 'none',
 }
 
 const GLASS_BLUR = 'blur(18px) saturate(140%)'
@@ -105,29 +112,35 @@ const GLASS_BLUR = 'blur(18px) saturate(140%)'
  */
 export const darkGlassColors: ThemeColors = {
   ...darkColors,
-  bgSurface: 'rgba(15, 26, 20, 0.55)',
-  bgCard: 'rgba(20, 32, 25, 0.55)',
-  bgCardElevated: 'rgba(28, 45, 33, 0.62)',
+  bgSurface: 'rgba(10, 20, 15, 0.42)',
+  bgCard: 'rgba(18, 32, 24, 0.38)',
+  bgCardElevated: 'rgba(40, 62, 48, 0.42)',
   bgActive: 'rgba(30, 53, 39, 0.78)',
   appBackground:
-    'radial-gradient(900px 600px at 85% -10%, rgba(90, 171, 114, 0.22), transparent 70%), ' +
-    'radial-gradient(800px 600px at 0% 110%, rgba(61, 122, 82, 0.28), transparent 70%), #0a1410',
+    'radial-gradient(1100px 750px at 92% -12%, rgba(90, 171, 114, 0.45), transparent 62%), ' +
+    'radial-gradient(950px 700px at -8% 108%, rgba(46, 160, 120, 0.38), transparent 62%), ' +
+    'radial-gradient(700px 520px at 48% 55%, rgba(30, 100, 66, 0.22), transparent 70%), #08110d',
   glassBlur: GLASS_BLUR,
   dialogBg: 'rgba(20, 32, 25, 0.78)',
+  cardBorder: 'rgba(255, 255, 255, 0.12)',
+  cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 24px rgba(0, 0, 0, 0.25)',
 }
 
 export const lightGlassColors: ThemeColors = {
   ...lightColors,
-  bgSurface: 'rgba(255, 255, 255, 0.6)',
-  bgCard: 'rgba(255, 255, 255, 0.55)',
-  bgCardElevated: 'rgba(237, 245, 239, 0.72)',
+  bgSurface: 'rgba(255, 255, 255, 0.45)',
+  bgCard: 'rgba(255, 255, 255, 0.42)',
+  bgCardElevated: 'rgba(255, 255, 255, 0.6)',
   bgActive: 'rgba(216, 237, 223, 0.85)',
   appBackground:
-    'radial-gradient(900px 600px at 85% -10%, rgba(90, 171, 114, 0.28), transparent 70%), ' +
-    'radial-gradient(800px 600px at 0% 110%, rgba(46, 125, 72, 0.16), transparent 70%), #eef4f0',
+    'radial-gradient(1100px 750px at 92% -12%, rgba(90, 171, 114, 0.42), transparent 62%), ' +
+    'radial-gradient(950px 700px at -8% 108%, rgba(46, 160, 120, 0.30), transparent 62%), ' +
+    'radial-gradient(700px 520px at 48% 55%, rgba(120, 200, 160, 0.20), transparent 70%), #e6f0ea',
   glassBlur: GLASS_BLUR,
   scrim: 'rgba(15, 26, 20, 0.28)',
   dialogBg: 'rgba(255, 255, 255, 0.82)',
+  cardBorder: 'rgba(255, 255, 255, 0.85)',
+  cardShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 8px 24px rgba(15, 26, 20, 0.08)',
 }
 
 interface ThemeContextValue {

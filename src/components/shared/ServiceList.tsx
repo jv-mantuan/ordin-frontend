@@ -76,7 +76,7 @@ function ServiceCard({ s, today, ...actions }: RowProps) {
       data-testid={`service-${s.id}`}
       aria-busy={actions.busy?.id === s.id}
       style={{
-        background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: radius.lg,
+        background: colors.bgCard, border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow, borderRadius: radius.lg,
         padding: '16px', opacity: actions.busy?.id === s.id ? 0.6 : muted ? 0.72 : 1, transition: 'opacity 0.2s ease',
       }}
     >
@@ -130,7 +130,7 @@ function ServiceTable({ services, today, ...actions }: Omit<ServiceListProps, 'i
   const num: React.CSSProperties = { ...th, textAlign: 'right' }
 
   return (
-    <div style={{ background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: radius.lg, overflowX: 'auto' }}>
+    <div style={{ background: colors.bgCard, border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow, borderRadius: radius.lg, overflowX: 'auto' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '860px' }}>
         <thead>
           <tr>

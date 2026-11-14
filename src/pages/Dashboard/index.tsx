@@ -168,7 +168,7 @@ export function DashboardPage() {
               <StatCard label="Despesas" value={formatCurrency(totalExpense)} />
               <div style={{
                 background: colors.bgCard,
-                border: `1px solid ${colors.border}`,
+                border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow,
                 borderRadius: radius.lg,
                 padding: isMobile ? '18px 20px' : '24px 26px',
                 minWidth: 0,
@@ -203,7 +203,7 @@ export function DashboardPage() {
             <div style={{
               gridColumn: isSmall ? '1' : '1 / -1',
               background: colors.bgCard,
-              border: `1px solid ${colors.border}`,
+              border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow,
               borderRadius: radius.lg,
               overflow: 'hidden',
               display: 'flex',

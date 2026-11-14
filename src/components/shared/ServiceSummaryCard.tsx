@@ -33,7 +33,7 @@ export function ServiceSummaryCard({ metrics }: ServiceSummaryCardProps) {
       style={{
         position: 'relative',
         background: colors.bgCard,
-        border: `1px solid ${colors.border}`,
+        border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow,
         borderRadius: radius.lg,
         padding: isMobile ? '18px 16px' : '22px 26px',
         marginBottom: '24px',

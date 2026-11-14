@@ -87,15 +87,16 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         <div
           style={{
             background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
+            border: `1px solid ${colors.cardBorder}`,
             borderRadius: radius.xl,
             padding: isMobile ? '24px 20px' : '32px 28px',
             display: 'flex',
             flexDirection: 'column',
             gap: '22px',
-            boxShadow: isDark
+            // Glass rim/highlight plus the login card's own deeper drop shadow.
+            boxShadow: `${colors.cardShadow === 'none' ? '' : `${colors.cardShadow}, `}${isDark
               ? '0 24px 60px -20px rgba(0,0,0,0.6)'
-              : '0 24px 60px -24px rgba(15,26,20,0.25)',
+              : '0 24px 60px -24px rgba(15,26,20,0.25)'}`,
           }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>

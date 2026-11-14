@@ -24,7 +24,8 @@ export function BarChart({ title, expensesByDate }: BarChartProps) {
     <div
       style={{
         background: colors.bgCard,
-        border: `1px solid ${colors.border}`,
+        border: `1px solid ${colors.cardBorder}`,
+        boxShadow: colors.cardShadow,
         borderRadius: '14px',
         padding: '22px 24px',
         flex: 1,

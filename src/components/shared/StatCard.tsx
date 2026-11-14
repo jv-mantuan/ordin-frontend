@@ -24,10 +24,11 @@ export function StatCard({ label, value, accent, sub, info, icon, valueSize = 36
       position: 'relative',
       background: accent
         ? isDark
-          ? `linear-gradient(145deg, #1e3d2a 0%, #0f2318 100%)`
-          : `linear-gradient(145deg, #d8eddf 0%, #c2e0cc 100%)`
+          ? `linear-gradient(145deg, rgba(36, 74, 50, 0.72) 0%, rgba(15, 35, 24, 0.5) 100%)`
+          : `linear-gradient(145deg, rgba(216, 237, 223, 0.8) 0%, rgba(194, 224, 204, 0.6) 100%)`
         : colors.bgCard,
-      border: `1px solid ${accent ? 'rgba(90,171,114,0.2)' : colors.border}`,
+      border: `1px solid ${accent ? 'rgba(90,171,114,0.2)' : colors.cardBorder}`,
+      boxShadow: colors.cardShadow,
       borderRadius: radius.lg,
       padding: '24px 26px',
       flex: 1,

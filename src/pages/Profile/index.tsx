@@ -65,7 +65,7 @@ export function ProfilePage() {
             width: '100%',
             maxWidth: isMobile ? '100%' : '480px',
             background: colors.bgCard,
-            border: `1px solid ${colors.border}`,
+            border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow,
             borderRadius: radius.xl,
             padding: isMobile ? spacing.lg : spacing.xl,
             display: 'flex',

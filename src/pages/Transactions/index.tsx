@@ -284,7 +284,7 @@ export function TransactionsPage() {
         {/* Table */}
         <div style={{
           background: colors.bgCard,
-          border: `1px solid ${colors.border}`,
+          border: `1px solid ${colors.cardBorder}`, boxShadow: colors.cardShadow,
           borderRadius: radius.lg,
           overflow: 'hidden',
         }}>
