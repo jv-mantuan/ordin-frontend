@@ -101,7 +101,7 @@ export async function getAccessToken(opts: { forceRefresh?: boolean } = {}): Pro
 }
 
 /** The SDK honours this header in its fetch layer and bypasses its in-memory session cache. */
-const FORCE_FETCH = { fetchOptions: { headers: { 'X-Force-Fetch': '1' } } }
+export const FORCE_FETCH = { fetchOptions: { headers: { 'X-Force-Fetch': '1' } } }
 
 async function fetchToken(force: boolean): Promise<string | null> {
   // The Neon adapter puts the JWT (from the set-auth-jwt header) in session.token and refreshes it.

@@ -28,6 +28,8 @@ export interface AuthContextValue {
   resendVerificationCode: (email: string) => Promise<{ error: string | null }>
   requestPasswordReset: (email: string) => Promise<{ error: string | null }>
   resetPassword: (email: string, code: string, newPassword: string) => Promise<{ error: string | null }>
+  /** Changes the account name in Neon Auth and refreshes the session and API token. */
+  updateName: (name: string) => Promise<{ error: string | null }>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

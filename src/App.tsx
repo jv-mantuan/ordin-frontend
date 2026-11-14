@@ -4,6 +4,7 @@ import { BottomNav } from './components/shared/BottomNav'
 import { DashboardPage } from './pages/Dashboard'
 import { TransactionsPage } from './pages/Transactions'
 import { CategoriesPage } from './pages/Categories'
+import { ProfilePage } from './pages/Profile'
 import { LoginPage } from './pages/Login'
 import { SignupPage } from './pages/Signup'
 import { VerifyEmailPage } from './pages/VerifyEmail'
@@ -63,6 +64,7 @@ function AppShell() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/transacoes" element={<TransactionsPage />} />
             <Route path="/categorias" element={<CategoriesPage />} />
+            <Route path="/perfil" element={<ProfilePage />} />
           </Routes>
         </div>
       </div>

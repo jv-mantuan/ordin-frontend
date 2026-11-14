@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { radius, spacing } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
@@ -94,17 +94,32 @@ export function Sidebar() {
         alignItems: 'center',
         gap: spacing.sm,
       }}>
-        <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
-          background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '11px', fontWeight: 600, color: colors.white, flexShrink: 0,
-        }}>{initials(user)}</div>
-        <div style={{ overflow: 'hidden', flex: 1 }}>
-          <div style={{ fontSize: '12px', fontWeight: 500, color: colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {displayName(user)}
+        <Link
+          to="/perfil"
+          title="Perfil"
+          aria-label="Perfil"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: spacing.sm,
+            flex: 1,
+            minWidth: 0,
+            textDecoration: 'none',
+            borderRadius: radius.sm,
+          }}
+        >
+          <div style={{
+            width: '28px', height: '28px', borderRadius: '50%',
+            background: `linear-gradient(135deg, ${colors.accentGreenMuted}, ${colors.accentGreen})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '11px', fontWeight: 600, color: colors.white, flexShrink: 0,
+          }}>{initials(user)}</div>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <div style={{ fontSize: '12px', fontWeight: 500, color: colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {displayName(user)}
+            </div>
           </div>
-        </div>
+        </Link>
         <button
           onClick={handleSignOut}
           title="Sair"

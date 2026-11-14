@@ -1,6 +1,13 @@
 import { type ReactNode, useCallback, useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { attempt, authClient, invalidateAccessToken, type AuthFailure } from '../lib/auth'
+import {
+  attempt,
+  authClient,
+  FORCE_FETCH,
+  getAccessToken,
+  invalidateAccessToken,
+  type AuthFailure,
+} from '../lib/auth'
 import { AuthContext, type AuthSession, type AuthUser } from './AuthContext'
 
 interface SdkUser {
@@ -14,9 +21,12 @@ function toAuthUser(u: SdkUser): AuthUser {
   return { id: u.id, email: u.email, name: u.name?.trim() || '', emailVerified: !!u.emailVerified }
 }
 
-/** Reads the current session from Neon Auth; null when signed out (also drops the cached JWT). */
-async function readSession(): Promise<AuthSession | null> {
-  const { data } = await attempt(() => authClient.getSession())
+/**
+ * Reads the current session from Neon Auth; null when signed out (also drops the cached JWT).
+ * `force` skips the SDK's session cache (needed right after the user changed).
+ */
+async function readSession(opts: { force?: boolean } = {}): Promise<AuthSession | null> {
+  const { data } = await attempt(() => (opts.force ? authClient.getSession(FORCE_FETCH) : authClient.getSession()))
   const user = (data as { user?: SdkUser } | null)?.user
   if (!user) invalidateAccessToken()
   return user ? { user: toAuthUser(user) } : null
@@ -123,6 +133,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: null }
   }, [])
 
+  const updateName = useCallback(async (name: string) => {
+    const { error } = await attempt(() => authClient.updateUser({ name: name.trim() }))
+    if (error) return { error: mapAuthError(error) }
+    // The save already succeeded: a failed re-read (e.g. network blip) must not sign the user out.
+    const fresh = await readSession({ force: true })
+    if (fresh) setSession(fresh)
+    // The API copies the JWT's `name` claim; fetch a new token so the next call carries it.
+    await getAccessToken({ forceRefresh: true })
+    return { error: null }
+  }, [])
+
   return (
     <AuthContext.Provider
       value={{
@@ -137,6 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resendVerificationCode,
         requestPasswordReset,
         resetPassword,
+        updateName,
       }}
     >
       {children}

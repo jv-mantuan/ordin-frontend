@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { radius, spacing } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
@@ -70,7 +70,20 @@ export function TopBar({ title, children }: TopBarProps) {
           {isDark ? <SunIcon /> : <MoonIcon />}
         </button>
 
-        {/* Avatar */}
+        {/* Avatar + name: link to the profile page */}
+        <Link
+          to="/perfil"
+          title="Perfil"
+          aria-label="Perfil"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: spacing.sm,
+            textDecoration: 'none',
+            borderRadius: radius.md,
+            minWidth: 0,
+          }}
+        >
         <div style={{
           width: isMobile ? '34px' : '30px',
           height: isMobile ? '34px' : '30px',
@@ -86,8 +99,17 @@ export function TopBar({ title, children }: TopBarProps) {
         }}>{initials(user)}</div>
 
         {!isMobile && (
-          <span style={{ fontSize: '13px', color: colors.textPrimary, fontWeight: 500 }}>{displayName(user)}</span>
+          <span style={{
+            fontSize: '13px',
+            color: colors.textPrimary,
+            fontWeight: 500,
+            maxWidth: '180px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>{displayName(user)}</span>
         )}
+        </Link>
 
         {/* Logout */}
         <button

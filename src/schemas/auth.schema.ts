@@ -18,6 +18,13 @@ export const signupSchema = z.object({
 
 export type SignupFormData = z.infer<typeof signupSchema>
 
+/** Profile edit: same name rule as sign-up, but a whitespace-only name is rejected. */
+export const profileSchema = z.object({
+  name: z.string().trim().min(1, 'Nome é obrigatório').max(150, 'Nome muito longo'),
+})
+
+export type ProfileFormData = z.infer<typeof profileSchema>
+
 /** 6-digit email code; spaces and dashes from a paste are ignored. */
 export const codeSchema = z.object({
   code: z
