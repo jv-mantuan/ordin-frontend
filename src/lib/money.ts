@@ -28,3 +28,8 @@ export function formatAmountInput(value: number): string {
     useGrouping: false,
   })
 }
+
+/** Formats a number as Brazilian currency, e.g. 1234.5 -> "R$ 1.234,50". */
+export function formatBRL(value: number): string {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}

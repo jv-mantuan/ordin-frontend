@@ -59,7 +59,7 @@ async function prepareDatabase(env) {
   try {
     await client.query(readFileSync(join(backendDir, 'test/sql/neon-auth.sql'), 'utf8'))
     // Fresh data every run; specs use unique names so parallel projects don't collide.
-    await client.query('TRUNCATE transactions, categories, users, neon_auth.account, neon_auth."user" CASCADE')
+    await client.query('TRUNCATE services, transactions, categories, users, neon_auth.account, neon_auth."user" CASCADE')
   } finally {
     await client.end()
   }

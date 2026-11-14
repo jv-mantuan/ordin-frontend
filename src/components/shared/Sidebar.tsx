@@ -8,6 +8,7 @@ import { displayName, initials } from '../../lib/user'
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: <GridIcon /> },
   { to: '/transacoes', label: 'Transações', icon: <ArrowsIcon /> },
+  { to: '/servicos', label: 'Serviços', icon: <BriefcaseIcon /> },
   { to: '/categorias', label: 'Categorias', icon: <TagIcon /> },
 ]
 
@@ -173,6 +174,14 @@ function LogoutIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
       <path d="M5.5 1.5H2.5a1 1 0 00-1 1v9a1 1 0 001 1h3M9 4l3 3-3 3M12 7H5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function BriefcaseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <rect x="1.25" y="4" width="11.5" height="8.25" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 4V2.9a.9.9 0 01.9-.9h2.2a.9.9 0 01.9.9V4M1.25 7.6h11.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   )
 }
