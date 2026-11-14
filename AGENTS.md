@@ -9,6 +9,10 @@ pnpm dev        # Start dev server (Vite + HMR)
 pnpm build      # Type-check (tsc -b) then bundle (vite build)
 pnpm lint       # Run ESLint
 pnpm preview    # Preview production build locally
+pnpm test:e2e          # Playwright e2e (sobe API própria na 3100 + Vite na 5391)
+pnpm test:e2e:ui       # Idem, no modo UI do Playwright
+pnpm test:e2e:real     # Smoke opcional com sessão real salva à mão (ver "E2E")
+pnpm test:bypass-guard # Prova que o bypass de auth do e2e não entra num build
 ```
 
 > This project uses **pnpm** as the package manager.
@@ -50,6 +54,23 @@ Two tsconfig files via project references:
   - O 403 de união de contas insegura vira toast e redireciona para `/esqueci-senha`.
 - **Códigos:** 6 dígitos, valem **~5 min** (o e-mail diz 10). O login com e-mail não confirmado **não** reenvia código, então o `signIn` chama `sendVerificationOtp` antes de ir para `/verificar-email`.
 - **Google:** `signIn.social` com `errorCallbackURL: /login`. A tela de login traduz `?error=` (ex.: `account_not_linked`).
+
+## E2E (Playwright)
+
+- **Specs** em `e2e/*.spec.ts`; fixtures em `e2e/fixtures.ts`. Projetos `mobile` (375×812, touch) e `desktop` (1440×900): todo spec roda nos dois.
+- **Servidores próprios** (`playwright.config.ts`), sem tocar nos de dev (3000/5173) nem no Neon:
+  - API na **3100** via `e2e/start-api.mjs`: banco Postgres **local** `ordin_e2e` (host/credenciais de `ordin-backend-node/env/test.env`), cria o banco, roda `prisma migrate deploy` + `test/sql/neon-auth.sql` e **trunca as tabelas a cada run**. `NODE_ENV=test`, `AUTH_USE_NEON=false` (todo request = master user). Recusa rodar se o host não for local. Compila em `ordin-backend-node/node_modules/.cache/ordin-e2e-ui` — nunca no `dist/` do backend.
+  - Vite na **5391** com `VITE_AUTH_BYPASS=true` (sempre novo; 5174 é o fallback do Vite quando a 5173 está ocupada).
+  - Localmente reaproveita uma API já de pé na 3100 (`reuseExistingServer`), sem migrar nem truncar de novo; se mudou o backend, derrube-a.
+- **Bypass de auth (só e2e):** `src/lib/authBypass.ts`. Ativo só com `import.meta.env.DEV && VITE_AUTH_BYPASS === 'true'`. A sessão vem de `localStorage['ordin.e2e.session']` (sem chave = deslogado); `getAccessToken` manda um token fixo; `signOut`/`updateName` mexem só nessa chave.
+  - **Nunca em produção:** `vite.config.ts` aborta `vite build` com a flag ligada, e `pnpm test:bypass-guard` verifica isso e que o bundle de produção não contém o código do bypass.
+- **Escrever um spec:** importe `test`/`expect` de `./fixtures`. Começa logado (fixture `signedIn`); para deslogado, `test.use({ signedIn: false })`. Use `uniqueName(testInfo, 'Prefixo')` para dados (mobile e desktop rodam em paralelo no mesmo usuário) e `createCategoryViaApi` para setup. Seletores por papel/label/texto pt-BR; botões só com ícone precisam de `aria-label`.
+- **Bug conhecido:** no mobile o sheet de categoria (`zIndex: 30`) fica sob a `BottomNav` (`z-index: 50`) e cobre "Salvar"; os specs de categoria estão em `test.fixme` no mobile até corrigir.
+- **Smoke com login real (opcional):** com os servidores de dev de pé (5173 + API 3000 com Neon), salve a sessão logando **à mão** na janela que abrir:
+  ```bash
+  pnpm exec playwright codegen --save-storage=e2e/.auth/real-user.json http://localhost:5173/login
+  ```
+  Depois `pnpm test:e2e:real` (só leitura; pula se o arquivo não existe). `e2e/.auth/` é gitignored. Agentes nunca rodam o passo que digita a senha.
 
 ## Architecture
 

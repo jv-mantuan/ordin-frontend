@@ -152,3 +152,10 @@ vite.config.ts.timestamp-*
 *.sln
 *.sw?
 temporary screenshots/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/e2e/.auth/

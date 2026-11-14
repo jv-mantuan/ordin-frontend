@@ -1,5 +1,6 @@
 import { createAuthClient, type VanillaBetterAuthClient } from '@neon/auth'
 import { BetterAuthVanillaAdapter } from '@neon/auth/vanilla/adapters'
+import { AUTH_BYPASS, BYPASS_TOKEN, readBypassSession } from './authBypass'
 
 const url = import.meta.env.VITE_NEON_AUTH_URL as string | undefined
 
@@ -86,6 +87,8 @@ export function invalidateAccessToken(): void {
  * `forceRefresh` skips both our cache and the SDK's session cache (use after the API answered 401).
  */
 export async function getAccessToken(opts: { forceRefresh?: boolean } = {}): Promise<string | null> {
+  // e2e bypass: the API (AUTH_USE_NEON=false) takes any token as the master user.
+  if (AUTH_BYPASS) return readBypassSession() ? BYPASS_TOKEN : null
   if (opts.forceRefresh) {
     cached = null
     inFlight = fetchToken(true).finally(() => {

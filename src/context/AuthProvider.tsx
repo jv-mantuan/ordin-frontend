@@ -8,6 +8,7 @@ import {
   invalidateAccessToken,
   type AuthFailure,
 } from '../lib/auth'
+import { AUTH_BYPASS, readBypassSession, writeBypassSession } from '../lib/authBypass'
 import { AuthContext, type AuthSession, type AuthUser } from './AuthContext'
 
 interface SdkUser {
@@ -26,6 +27,7 @@ function toAuthUser(u: SdkUser): AuthUser {
  * `force` skips the SDK's session cache (needed right after the user changed).
  */
 async function readSession(opts: { force?: boolean } = {}): Promise<AuthSession | null> {
+  if (AUTH_BYPASS) return readBypassSession()
   const { data } = await attempt(() => (opts.force ? authClient.getSession(FORCE_FETCH) : authClient.getSession()))
   const user = (data as { user?: SdkUser } | null)?.user
   if (!user) invalidateAccessToken()
@@ -88,7 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const signOut = useCallback(async () => {
-    await attempt(() => authClient.signOut())
+    if (AUTH_BYPASS) writeBypassSession(null)
+    else await attempt(() => authClient.signOut())
     invalidateAccessToken()
     // Drop the previous user's cached API data so the next user in this tab never sees it.
     queryClient.clear()
@@ -134,6 +137,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const updateName = useCallback(async (name: string) => {
+    if (AUTH_BYPASS) {
+      const current = readBypassSession()
+      const renamed = current ? { user: { ...current.user, name: name.trim() } } : null
+      writeBypassSession(renamed)
+      setSession(renamed)
+      return { error: null }
+    }
     const { error } = await attempt(() => authClient.updateUser({ name: name.trim() }))
     if (error) return { error: mapAuthError(error) }
     // The save already succeeded: a failed re-read (e.g. network blip) must not sign the user out.
