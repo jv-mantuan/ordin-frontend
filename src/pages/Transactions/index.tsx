@@ -313,7 +313,7 @@ export function TransactionsPage() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(10, 20, 16, 0.72)',
+            background: colors.scrim,
             display: 'flex',
             alignItems: isMobile ? 'flex-end' : 'center',
             justifyContent: 'center',
@@ -323,10 +323,14 @@ export function TransactionsPage() {
         >
           <div
             onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
             style={{
               width: '100%',
               maxWidth: isMobile ? '100%' : '460px',
-              background: colors.bgCard,
+              background: colors.dialogBg,
+              backdropFilter: colors.glassBlur,
+              WebkitBackdropFilter: colors.glassBlur,
               border: `1px solid ${colors.border}`,
               borderRadius: isMobile ? '16px 16px 0 0' : radius.xl,
               padding: isMobile ? '20px 16px 0' : '22px',

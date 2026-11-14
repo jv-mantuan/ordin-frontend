@@ -167,7 +167,7 @@ export function CategoriesPage() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10, 20, 16, 0.72)",
+            background: colors.scrim,
             display: "flex",
             alignItems: isMobile ? "flex-end" : "center",
             justifyContent: "center",
@@ -177,10 +177,14 @@ export function CategoriesPage() {
         >
           <div
             onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
             style={{
               width: "100%",
               maxWidth: isMobile ? "100%" : "420px",
-              background: colors.bgCard,
+              background: colors.dialogBg,
+              backdropFilter: colors.glassBlur,
+              WebkitBackdropFilter: colors.glassBlur,
               border: `1px solid ${colors.border}`,
               borderRadius: isMobile ? `24px 24px 0 0` : radius.xl,
               padding: isMobile ? "24px 20px max(env(safe-area-inset-bottom), 24px)" : "22px",

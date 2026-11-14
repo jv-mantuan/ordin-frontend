@@ -86,6 +86,8 @@ export function InfoTip({ label, text }: { label: string; text: string }) {
           style={{
             position: 'absolute', left: '14px', right: '14px', top, zIndex: 20,
             background: isDark ? colors.bgCardElevated : colors.bgSurface,
+            backdropFilter: colors.glassBlur,
+            WebkitBackdropFilter: colors.glassBlur,
             border: `1px solid ${colors.border}`, borderRadius: radius.md,
             padding: '12px 14px', fontSize: '13px', lineHeight: 1.55, fontWeight: 400,
             color: colors.textPrimary,

@@ -26,6 +26,13 @@ export interface ThemeColors {
   primaryButtonBg: string
   primaryButtonText: string
   primaryButtonBorder: string
+  /** Page background: the solid color plus soft green glows that show through the glass. */
+  appBackground: string
+  /** backdrop-filter for overlays (dialogs, tooltips, toasts, bottom bar); 'none' when solid. */
+  glassBlur: string
+  /** Dimmed backdrop behind dialogs, and the dialog panel itself (more opaque than a card). */
+  scrim: string
+  dialogBg: string
 }
 
 export const darkColors: ThemeColors = {
@@ -53,6 +60,10 @@ export const darkColors: ThemeColors = {
   primaryButtonBg: '#2a5438',
   primaryButtonText: '#a8dcb5', // 5.6:1 on the bg
   primaryButtonBorder: 'rgba(90, 171, 114, 0.25)',
+  appBackground: '#0a1410',
+  glassBlur: 'none',
+  scrim: 'rgba(10, 20, 16, 0.72)',
+  dialogBg: '#142019',
 }
 
 export const lightColors: ThemeColors = {
@@ -80,6 +91,43 @@ export const lightColors: ThemeColors = {
   primaryButtonBg: '#2e7d48',
   primaryButtonText: '#ffffff', // 5.1:1 on the bg
   primaryButtonBorder: '#2e7d48',
+  appBackground: '#eef4f0',
+  glassBlur: 'none',
+  scrim: 'rgba(15, 26, 20, 0.35)',
+  dialogBg: '#f7faf8',
+}
+
+const GLASS_BLUR = 'blur(18px) saturate(140%)'
+
+/**
+ * "Glass" (direction A, subtle): translucent surfaces over a background with two soft green glows.
+ * darkColors/lightColors above stay as the solid look, used when the OS asks for reduced transparency.
+ */
+export const darkGlassColors: ThemeColors = {
+  ...darkColors,
+  bgSurface: 'rgba(15, 26, 20, 0.55)',
+  bgCard: 'rgba(20, 32, 25, 0.55)',
+  bgCardElevated: 'rgba(28, 45, 33, 0.62)',
+  bgActive: 'rgba(30, 53, 39, 0.78)',
+  appBackground:
+    'radial-gradient(900px 600px at 85% -10%, rgba(90, 171, 114, 0.22), transparent 70%), ' +
+    'radial-gradient(800px 600px at 0% 110%, rgba(61, 122, 82, 0.28), transparent 70%), #0a1410',
+  glassBlur: GLASS_BLUR,
+  dialogBg: 'rgba(20, 32, 25, 0.78)',
+}
+
+export const lightGlassColors: ThemeColors = {
+  ...lightColors,
+  bgSurface: 'rgba(255, 255, 255, 0.6)',
+  bgCard: 'rgba(255, 255, 255, 0.55)',
+  bgCardElevated: 'rgba(237, 245, 239, 0.72)',
+  bgActive: 'rgba(216, 237, 223, 0.85)',
+  appBackground:
+    'radial-gradient(900px 600px at 85% -10%, rgba(90, 171, 114, 0.28), transparent 70%), ' +
+    'radial-gradient(800px 600px at 0% 110%, rgba(46, 125, 72, 0.16), transparent 70%), #eef4f0',
+  glassBlur: GLASS_BLUR,
+  scrim: 'rgba(15, 26, 20, 0.28)',
+  dialogBg: 'rgba(255, 255, 255, 0.82)',
 }
 
 interface ThemeContextValue {

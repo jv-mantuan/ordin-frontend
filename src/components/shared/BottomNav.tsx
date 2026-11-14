@@ -27,8 +27,8 @@ export function BottomNav() {
         zIndex: 50,
         paddingBottom: 'env(safe-area-inset-bottom)',
         // Subtle glassmorphism for depth
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        backdropFilter: colors.glassBlur,
+        WebkitBackdropFilter: colors.glassBlur,
       }}
     >
       {NAV_ITEMS.map(({ to, label, icon }) => (

@@ -21,7 +21,7 @@ function AuthSplash() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: colors.bgApp,
+        background: colors.appBackground,
       }}
     >
       <img

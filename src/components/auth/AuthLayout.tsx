@@ -23,7 +23,7 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
         alignItems: 'center',
         justifyContent: 'center',
         padding: isMobile ? '20px 16px' : '24px',
-        background: colors.bgApp,
+        background: colors.appBackground,
         // Atmospheric green glow behind the card (not a flat fill)
         backgroundImage: `radial-gradient(circle at 50% 0%, ${colors.accentGreenMuted}2e, transparent 55%)`,
       }}

@@ -101,6 +101,8 @@ export function Sidebar() {
         width: `${current}px`,
         minWidth: `${current}px`,
         background: colors.bgSurface,
+        backdropFilter: colors.glassBlur,
+        WebkitBackdropFilter: colors.glassBlur,
         borderRight: `1px solid ${colors.border}`,
         display: 'flex',
         flexDirection: 'column',

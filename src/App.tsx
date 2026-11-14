@@ -52,11 +52,11 @@ function AppShell() {
 
   return (
     <>
-      <div style={{
+      <div data-app-shell style={{
         display: 'flex',
         flexDirection: 'row',
         height: '100vh',
-        background: colors.bgApp,
+        background: colors.appBackground,
         overflow: 'hidden',
       }}>
         <Sidebar />
@@ -89,6 +89,8 @@ function Toasts() {
       theme="dark"
       toastStyle={{
         background: colors.bgCard,
+        backdropFilter: colors.glassBlur,
+        WebkitBackdropFilter: colors.glassBlur,
         color: colors.textPrimary,
         border: `1px solid ${colors.border}`,
         marginBottom: isMobile ? '64px' : '0',
