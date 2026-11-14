@@ -51,6 +51,11 @@ client.interceptors.response.use(
       toast.error(message, { toastId: 'account-linking' })
       if (window.location.pathname !== '/esqueci-senha') window.location.assign('/esqueci-senha')
     }
+    // Rate limit / daily quota on a read: nothing on screen would explain the empty or stale data.
+    // Writes already show the API message in their form or toast, so they are left to the caller.
+    if (error.response?.status === 429 && (config?.method ?? 'get').toLowerCase() === 'get') {
+      toast.warning(message, { toastId: 'rate-limit' })
+    }
     return Promise.reject({ message, requestId })
   },
 )
