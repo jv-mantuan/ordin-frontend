@@ -83,11 +83,11 @@ export function DashboardPage() {
                 border: `1px solid ${colors.primaryButtonBorder}`,
                 borderRadius: radius.md,
                 color: colors.primaryButtonText,
-                fontSize: '12px',
-                fontWeight: 500,
-                padding: '6px 14px',
+                fontSize: '13px',
+                fontWeight: 600,
+                padding: '0 16px',
+                minHeight: '44px',
                 cursor: 'pointer',
-                minHeight: '36px',
                 whiteSpace: 'nowrap',
               }}
             >
