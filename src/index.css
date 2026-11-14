@@ -19,6 +19,9 @@ body {
   color: #e2ede4;
   /* IBM Plex Sans everywhere, titles included (the owner prefers it to a serif). Loaded in index.html. */
   font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Plex has a small x-height, so text looked small at the px sizes the components use. This scales
+     every glyph (it is inherited, inline px sizes included) to an x-height of 0.56em: about 8% larger. */
+  font-size-adjust: 0.56;
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
