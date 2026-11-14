@@ -164,7 +164,7 @@ export function ServicesPage() {
         fontSize: '13px',
         fontWeight: 500,
         padding: '0 14px',
-        cursor: todayCount === 0 ? 'not-allowed' : completeByDate.isPending ? 'wait' : 'pointer',
+        cursor: todayCount === 0 ? 'not-allowed' : 'pointer',
         minHeight: '44px',
         whiteSpace: 'nowrap',
         flex: isMobile ? 1 : undefined,
