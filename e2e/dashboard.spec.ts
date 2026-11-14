@@ -20,3 +20,18 @@ test('navigation reaches the other pages (sidebar on desktop, bottom bar on mobi
   await expect(page).toHaveURL(/\/categorias$/)
   await expect(page.getByRole('heading', { name: 'Categorias' })).toBeVisible()
 })
+
+test('the month title reads "Novembro de 2026" on one line', async ({ page }) => {
+  await page.clock.setFixedTime(new Date(2026, 10, 14, 12, 0))
+  await page.goto('/')
+  const title = page.getByText('Novembro de 2026', { exact: true })
+  await expect(title).toBeVisible()
+  const box = (await title.boundingBox())!
+  const lineHeight = await title.evaluate((el) => parseFloat(getComputedStyle(el).lineHeight) || parseFloat(getComputedStyle(el).fontSize) * 1.5)
+  expect(box.height).toBeLessThan(lineHeight * 1.5)
+
+  await page.getByRole('button', { name: 'Mês anterior' }).click()
+  await expect(page.getByText('Outubro de 2026', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Próximo mês' }).click()
+  await expect(title).toBeVisible()
+})

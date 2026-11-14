@@ -12,6 +12,12 @@ import { useTheme } from '../../context/ThemeContext'
 
 const SEGMENT_COLORS = ['#5aab72', '#2f6b47', '#8fd39d', '#1f4730', '#6fbf83', '#b4e6bf']
 
+/** "novembro de 2026" → "Novembro de 2026" (only the first letter, unlike CSS capitalize). */
+function monthTitle(date: Date) {
+  const text = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 }
@@ -114,16 +120,17 @@ export function DashboardPage() {
         )}
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: isMobile ? '24px' : '32px', gap: '12px' }}>
-          <button onClick={handlePrevMonth} style={{ background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.textSecondary, transition: 'background 0.2s' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          <button onClick={handlePrevMonth} aria-label="Mês anterior" title="Mês anterior" style={{ background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.textSecondary, transition: 'background 0.2s' }}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
           
-          <div style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 600, color: colors.textPrimary, textTransform: 'capitalize', width: '160px', textAlign: 'center', letterSpacing: '-0.01em' }}>
-            {currentDate.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
+          {/* Fixed min width so the arrows barely move between months; never wraps. */}
+          <div style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 600, color: colors.textPrimary, minWidth: isMobile ? '160px' : '190px', whiteSpace: 'nowrap', textAlign: 'center', letterSpacing: '-0.01em' }}>
+            {monthTitle(currentDate)}
           </div>
           
-          <button onClick={handleNextMonth} style={{ background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.textSecondary, transition: 'background 0.2s' }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <button onClick={handleNextMonth} aria-label="Próximo mês" title="Próximo mês" style={{ background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.textSecondary, transition: 'background 0.2s' }}>
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </button>
         </div>
 
