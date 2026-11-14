@@ -19,6 +19,7 @@ const MIN_WIDTH = 180
 const MAX_WIDTH = 320
 const COLLAPSED_WIDTH = 64
 const KEY_STEP = 16
+const EASE = '220ms cubic-bezier(0.2, 0.8, 0.2, 1)'
 
 const WIDTH_KEY = 'ordin.sidebar.width'
 const COLLAPSED_KEY = 'ordin.sidebar.collapsed'
@@ -95,6 +96,7 @@ export function Sidebar() {
   return (
     <aside
       aria-label="Menu"
+      className="sidebar-aside"
       style={{
         width: `${current}px`,
         minWidth: `${current}px`,
@@ -107,6 +109,8 @@ export function Sidebar() {
         top: 0,
         // While dragging, stop text selection across the page.
         userSelect: dragging ? 'none' : undefined,
+        // Collapse/expand animates; dragging must follow the pointer with no lag.
+        transition: dragging ? 'none' : `width ${EASE}, min-width ${EASE}`,
       }}
     >
       {/* Logo + collapse toggle */}
@@ -118,6 +122,7 @@ export function Sidebar() {
           flexDirection: collapsed ? 'column' : 'row',
           alignItems: 'center',
           gap: collapsed ? '8px' : '10px',
+          overflow: 'hidden',
         }}
       >
         <img
@@ -127,6 +132,7 @@ export function Sidebar() {
         />
         {!collapsed && (
           <span
+            className="sidebar-fade"
             style={{
               color: colors.textPrimary,
               fontWeight: 700,
@@ -153,7 +159,7 @@ export function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: '2px', overflow: 'hidden' }}>
         {NAV_ITEMS.map(({ to, label, icon }) => (
           <NavLink
             key={to}
@@ -181,7 +187,7 @@ export function Sidebar() {
             })}
           >
             <span style={{ opacity: 0.8, display: 'flex' }}>{icon}</span>
-            {!collapsed && label}
+            {!collapsed && <span className="sidebar-fade">{label}</span>}
           </NavLink>
         ))}
       </nav>
@@ -195,6 +201,7 @@ export function Sidebar() {
           flexDirection: collapsed ? 'column' : 'row',
           alignItems: 'center',
           gap: collapsed ? '6px' : spacing.sm,
+          overflow: 'hidden',
         }}
       >
         <Link
@@ -229,7 +236,7 @@ export function Sidebar() {
             {initials(user)}
           </div>
           {!collapsed && (
-            <div style={{ overflow: 'hidden', flex: 1 }}>
+            <div className="sidebar-fade" style={{ overflow: 'hidden', flex: 1 }}>
               <div
                 style={{
                   fontSize: '12px',
@@ -335,6 +342,12 @@ export function Sidebar() {
         }
         .sidebar-resizer:hover::after, .sidebar-resizer:focus-visible::after, .sidebar-resizer.is-dragging::after { opacity: 0.8; }
         .sidebar-resizer:focus-visible { outline: none; }
+        @keyframes sidebar-fade-in { from { opacity: 0; } to { opacity: 1; } }
+        .sidebar-fade { animation: sidebar-fade-in 180ms ease 90ms both; }
+        @media (prefers-reduced-motion: reduce) {
+          .sidebar-aside { transition: none !important; }
+          .sidebar-fade { animation: none; }
+        }
       `}</style>
     </aside>
   )

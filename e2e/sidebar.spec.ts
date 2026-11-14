@@ -59,4 +59,26 @@ test.describe('sidebar', () => {
     await handle.dblclick()
     await expect.poll(() => sidebarWidth(page)).toBeCloseTo(start, 0)
   })
+
+  test('collapsing animates the width, but not while dragging', async ({ page }) => {
+    await page.goto('/')
+    const aside = page.getByRole('complementary', { name: 'Menu' })
+    const transition = () => aside.evaluate((el) => getComputedStyle(el).transitionProperty)
+    expect(await transition()).toContain('width')
+
+    const handle = page.getByRole('separator', { name: 'Redimensionar menu' })
+    const box = (await handle.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + 200)
+    await page.mouse.down()
+    await page.mouse.move(box.x + box.width / 2 + 20, box.y + 200)
+    expect(await transition()).not.toContain('width')
+    await page.mouse.up()
+  })
+
+  test('no width animation when the user prefers reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.goto('/')
+    const aside = page.getByRole('complementary', { name: 'Menu' })
+    expect(await aside.evaluate((el) => getComputedStyle(el).transitionProperty)).not.toContain('width')
+  })
 })
