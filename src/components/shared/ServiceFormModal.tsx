@@ -5,6 +5,7 @@ import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { formatAmountInput, formatBRL, parseAmount } from '../../lib/money'
 import { todayISO } from '../../lib/date'
 import { serviceSchema } from '../../schemas/service.schema'
+import { Spinner } from './Spinner'
 import type { ServiceDto, ServiceRequest } from '../../types/service'
 
 interface ServiceFormModalProps {
@@ -222,6 +223,7 @@ export function ServiceFormModal({ service, isSaving, onClose, onSubmit }: Servi
             className="svc-btn"
             onClick={() => void save()}
             disabled={isSaving}
+            aria-busy={isSaving}
             style={{
               background: colors.accentGreenMuted,
               border: '1px solid rgba(90,171,114,0.25)',
@@ -234,9 +236,13 @@ export function ServiceFormModal({ service, isSaving, onClose, onSubmit }: Servi
               opacity: isSaving ? 0.75 : 1,
               minHeight: '44px',
               flex: isMobile ? 1.5 : undefined,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
             }}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? <><Spinner />Salvando…</> : 'Salvar'}
           </button>
         </div>
       </div>

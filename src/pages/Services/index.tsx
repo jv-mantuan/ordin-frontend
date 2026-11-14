@@ -5,7 +5,8 @@ import { useTheme } from '../../context/ThemeContext'
 import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { TopBar } from '../../components/shared/TopBar'
 import { ServiceSummaryCard } from '../../components/shared/ServiceSummaryCard'
-import { ServiceList } from '../../components/shared/ServiceList'
+import { ServiceList, type BusyRow, type RowAction } from '../../components/shared/ServiceList'
+import { Spinner } from '../../components/shared/Spinner'
 import { ServiceFormModal } from '../../components/shared/ServiceFormModal'
 import { LoadMore } from '../../components/shared/LoadMore'
 import { PeriodFilter } from '../../components/shared/PeriodFilter'
@@ -54,7 +55,7 @@ export function ServicesPage() {
     if (nextRange) setRange(nextRange)
   }
   const [modal, setModal] = useState<{ service: ServiceDto | null } | null>(null)
-  const [busyId, setBusyId] = useState<string | null>(null)
+  const [busy, setBusy] = useState<BusyRow | null>(null)
 
   const createService = useCreateService()
   const updateService = useUpdateService()
@@ -73,15 +74,21 @@ export function ServicesPage() {
   const summary = useServicesSummary(today, range)
   const todayCount = summary.data?.todayScheduled ?? 0
 
-  const runAction = async (s: ServiceDto, fn: (id: string) => Promise<unknown>, success: string, fallback: string) => {
-    setBusyId(s.id)
+  const runAction = async (
+    s: ServiceDto,
+    action: RowAction,
+    fn: (id: string) => Promise<unknown>,
+    success: string,
+    fallback: string,
+  ) => {
+    setBusy({ id: s.id, action })
     try {
       await fn(s.id)
       toast.success(success)
     } catch (e) {
       toast.error(errorMessage(e, fallback))
     } finally {
-      setBusyId(null)
+      setBusy(null)
     }
   }
 
@@ -163,7 +170,7 @@ export function ServicesPage() {
         flex: isMobile ? 1 : undefined,
       }}
     >
-      {completeByDate.isPending ? 'Concluindo…' : 'Concluir serviços de hoje'}
+      {completeByDate.isPending ? <><Spinner />Concluindo…</> : 'Concluir serviços de hoje'}
       <span
         aria-label={`(${todayCount})`}
         style={{
@@ -260,13 +267,13 @@ export function ServicesPage() {
               today={today}
               isLoading={list.isLoading}
               emptyText={range.from || range.to ? 'Nenhum serviço neste período.' : FILTERS.find((f) => f.value === filter)!.empty}
-              busyId={busyId}
+              busy={busy}
               onEdit={(s) => setModal({ service: s })}
-              onComplete={(s) => void runAction(s, completeService.mutateAsync, 'Serviço concluído!', 'Não foi possível concluir o serviço.')}
-              onReopen={(s) => void runAction(s, reopenService.mutateAsync, 'Serviço reaberto.', 'Não foi possível reabrir o serviço.')}
+              onComplete={(s) => void runAction(s, 'complete', completeService.mutateAsync, 'Serviço concluído!', 'Não foi possível concluir o serviço.')}
+              onReopen={(s) => void runAction(s, 'reopen', reopenService.mutateAsync, 'Serviço reaberto.', 'Não foi possível reabrir o serviço.')}
               onCancel={(s) => {
                 if (!confirm(`Cancelar o serviço "${s.name}"?`)) return
-                void runAction(s, cancelService.mutateAsync, 'Serviço cancelado.', 'Não foi possível cancelar o serviço.')
+                void runAction(s, 'cancel', cancelService.mutateAsync, 'Serviço cancelado.', 'Não foi possível cancelar o serviço.')
               }}
             />
           )}

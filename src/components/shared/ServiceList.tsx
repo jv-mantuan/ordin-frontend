@@ -4,6 +4,15 @@ import { useBreakpoint } from '../../hooks/useBreakpoint'
 import { formatBRL } from '../../lib/money'
 import { formatDateBR } from '../../lib/date'
 import type { ServiceDto, ServiceStatus } from '../../types/service'
+import { Spinner } from './Spinner'
+
+export type RowAction = 'complete' | 'cancel' | 'reopen'
+
+/** The row action in flight, if any (one at a time). */
+export interface BusyRow {
+  id: string
+  action: RowAction
+}
 
 export interface ServiceActions {
   onEdit: (s: ServiceDto) => void
@@ -17,7 +26,7 @@ interface ServiceListProps extends ServiceActions {
   today: string
   isLoading: boolean
   emptyText: string
-  busyId: string | null
+  busy: BusyRow | null
 }
 
 const STATUS_LABEL: Record<ServiceStatus, string> = {
@@ -65,9 +74,10 @@ function ServiceCard({ s, today, ...actions }: RowProps) {
   return (
     <article
       data-testid={`service-${s.id}`}
+      aria-busy={actions.busy?.id === s.id}
       style={{
         background: colors.bgCard, border: `1px solid ${colors.border}`, borderRadius: radius.lg,
-        padding: '16px', opacity: muted ? 0.72 : 1,
+        padding: '16px', opacity: actions.busy?.id === s.id ? 0.6 : muted ? 0.72 : 1, transition: 'opacity 0.2s ease',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px' }}>
@@ -156,7 +166,12 @@ function ServiceRow({ s, today, ...actions }: RowProps) {
   const receivable = receivableOf(s)
 
   return (
-    <tr data-testid={`service-${s.id}`} className="svc-row" style={{ opacity: s.status === 'cancelled' ? 0.68 : 1 }}>
+    <tr
+      data-testid={`service-${s.id}`}
+      className="svc-row"
+      aria-busy={actions.busy?.id === s.id}
+      style={{ opacity: actions.busy?.id === s.id ? 0.6 : s.status === 'cancelled' ? 0.68 : 1, transition: 'opacity 0.2s ease' }}
+    >
       <td style={{ ...td, minWidth: '180px', maxWidth: '280px' }}>
         <div style={{ fontWeight: 600, overflowWrap: 'break-word' }}>{s.name}</div>
         {s.clientName && <Detail label="Cliente" colors={colors}>{s.clientName}</Detail>}
@@ -251,10 +266,11 @@ function StatusBadge({ status }: { status: ServiceStatus }) {
   )
 }
 
-function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busyId, big }: Omit<RowProps, 'today'> & { big?: boolean }) {
+function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busy: busyRow, big }: Omit<RowProps, 'today'> & { big?: boolean }) {
   const { colors } = useTheme()
   const { isTablet } = useBreakpoint()
-  const busy = busyId === s.id
+  const busy = busyRow?.id === s.id
+  const running = (action: RowAction) => busy && busyRow?.action === action
   // Touch screens (phones and tablets) get 44px targets.
   const touch = big || isTablet
   const base: React.CSSProperties = {
@@ -269,6 +285,10 @@ function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busyId, big }: 
     background: colors.bgSurface,
     color: colors.textSecondary,
     whiteSpace: 'nowrap',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
   }
   const primary: React.CSSProperties = {
     ...base,
@@ -281,13 +301,13 @@ function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busyId, big }: 
   return (
     <>
       {s.status === 'scheduled' && (
-        <button type="button" className="svc-btn" style={primary} disabled={busy} aria-label={`Concluir ${s.name}`} onClick={() => onComplete(s)}>
-          Concluir
+        <button type="button" className="svc-btn" style={primary} disabled={busy} aria-busy={running('complete')} aria-label={`Concluir ${s.name}`} onClick={() => onComplete(s)}>
+          {running('complete') ? <><Spinner />Concluindo…</> : 'Concluir'}
         </button>
       )}
       {s.status !== 'scheduled' && (
-        <button type="button" className="svc-btn" style={base} disabled={busy} aria-label={`Reabrir ${s.name}`} onClick={() => onReopen(s)}>
-          Reabrir
+        <button type="button" className="svc-btn" style={base} disabled={busy} aria-busy={running('reopen')} aria-label={`Reabrir ${s.name}`} onClick={() => onReopen(s)}>
+          {running('reopen') ? <><Spinner />Reabrindo…</> : 'Reabrir'}
         </button>
       )}
       <button type="button" className="svc-btn" style={base} disabled={busy} aria-label={`Editar ${s.name}`} onClick={() => onEdit(s)}>
@@ -299,10 +319,11 @@ function RowActions({ s, onEdit, onComplete, onCancel, onReopen, busyId, big }: 
           className="svc-btn"
           style={{ ...base, color: colors.expense }}
           disabled={busy}
+          aria-busy={running('cancel')}
           aria-label={`Cancelar ${s.name}`}
           onClick={() => onCancel(s)}
         >
-          Cancelar
+          {running('cancel') ? <><Spinner />Cancelando…</> : 'Cancelar'}
         </button>
       )}
     </>

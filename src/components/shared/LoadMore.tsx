@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { radius } from '../../theme'
 import { useTheme } from '../../context/ThemeContext'
+import { Spinner } from './Spinner'
 
 interface LoadMoreProps {
   hasNextPage: boolean
@@ -61,9 +62,12 @@ export function LoadMore({ hasNextPage, isFetching, hasError = false, onLoadMore
           fontSize: '13px',
           fontWeight: 500,
           cursor: isFetching ? 'wait' : 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
         }}
       >
-        {isFetching ? 'Carregando…' : hasError ? 'Tentar de novo' : 'Carregar mais'}
+        {isFetching ? <><Spinner />Carregando…</> : hasError ? 'Tentar de novo' : 'Carregar mais'}
       </button>
       <style>{`
         .load-more-btn { transition: opacity 0.15s ease, transform 0.1s ease; }

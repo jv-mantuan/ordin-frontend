@@ -1,6 +1,6 @@
 import { todayISO } from './date'
 
-export type PeriodPreset = 'all' | 'thisMonth' | 'next30' | 'lastMonth' | 'custom'
+export type PeriodPreset = 'all' | 'thisWeek' | 'thisMonth' | 'next30' | 'lastMonth' | 'custom'
 
 export interface Period {
   preset: PeriodPreset
@@ -17,6 +17,7 @@ export interface DateRange {
 
 export const PERIOD_OPTIONS: { value: PeriodPreset; label: string }[] = [
   { value: 'all', label: 'Todo o período' },
+  { value: 'thisWeek', label: 'Esta semana' },
   { value: 'thisMonth', label: 'Este mês' },
   { value: 'next30', label: 'Próximos 30 dias' },
   { value: 'lastMonth', label: 'Mês passado' },
@@ -35,6 +36,13 @@ export function periodRange(period: Period, now: Date = new Date()): DateRange |
   switch (period.preset) {
     case 'all':
       return {}
+    case 'thisWeek': {
+      // Monday to Sunday (Brazilian business week).
+      const sinceMonday = (now.getDay() + 6) % 7
+      const monday = new Date(y, m, now.getDate() - sinceMonday)
+      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6)
+      return { from: todayISO(monday), to: todayISO(sunday) }
+    }
     case 'thisMonth':
       return { from: todayISO(new Date(y, m, 1)), to: todayISO(new Date(y, m + 1, 0)) }
     case 'lastMonth':

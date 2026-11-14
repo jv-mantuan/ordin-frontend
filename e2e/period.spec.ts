@@ -42,3 +42,12 @@ test('a reversed custom period is not applied and says why', async ({ page }) =>
   await page.getByLabel('Até', { exact: true }).fill('2031-05-01')
   await expect(page.getByText('A data inicial precisa ser antes da final.')).toBeVisible()
 })
+
+test('"Esta semana" sends Monday to Sunday of the local week', async ({ page }) => {
+  // Saturday 14/11/2026 → week of Monday 09/11 to Sunday 15/11.
+  await page.clock.setFixedTime(new Date(2026, 10, 14, 23, 30))
+  await page.goto('/servicos')
+  const summary = page.waitForRequest((r) => r.url().includes('/v1/services/summary') && r.url().includes('from=2026-11-09') && r.url().includes('to=2026-11-15'))
+  await page.getByLabel('Período').selectOption({ label: 'Esta semana' })
+  await summary
+})
