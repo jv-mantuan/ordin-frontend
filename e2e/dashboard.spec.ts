@@ -35,3 +35,27 @@ test('the month title reads "Novembro de 2026" on one line', async ({ page }) =>
   await page.getByRole('button', { name: 'Próximo mês' }).click()
   await expect(title).toBeVisible()
 })
+
+test('the donut is drawn when all expenses are in one category', async ({ page }) => {
+  await page.route('**/v1/transactions/summary?**', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: {
+          income: 0,
+          expense: 100,
+          balance: -100,
+          expenseByCategory: [{ categoryId: '11111111-1111-1111-1111-111111111111', categoryName: 'Única', total: 100 }],
+          expenseByDay: [{ day: '2026-11-14', total: 100 }],
+        },
+        metadata: { requestId: 'x', timestamp: '' },
+      }),
+    }),
+  )
+  await page.goto('/')
+  const ring = page.locator('svg path[data-donut-segment]').first()
+  await expect(ring).toBeVisible()
+  const box = (await ring.boundingBox())!
+  expect(box.width).toBeGreaterThan(60)
+})

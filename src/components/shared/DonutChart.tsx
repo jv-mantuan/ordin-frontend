@@ -20,6 +20,9 @@ function segmentPath(
   outerR: number, innerR: number,
   startAngle: number, endAngle: number,
 ): string {
+  // A full 360° arc starts and ends on the same point, which SVG draws as nothing:
+  // stop just short of a full turn so a single category still shows a complete ring.
+  if (endAngle - startAngle >= 359.99) endAngle = startAngle + 359.99
   const [ox1, oy1] = polar(cx, cy, outerR, startAngle)
   const [ox2, oy2] = polar(cx, cy, outerR, endAngle)
   const [ix1, iy1] = polar(cx, cy, innerR, startAngle)
@@ -79,6 +82,7 @@ export function DonutChart({ segments }: DonutChartProps) {
             <svg width={228} height={228} viewBox="0 0 228 228">
               {paths.map((seg, i) => (
                 <path
+                  data-donut-segment
                   key={i}
                   d={segmentPath(cx, cy, outerR, innerR, seg.start, seg.end)}
                   fill={seg.color}
